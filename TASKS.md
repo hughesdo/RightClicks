@@ -35,10 +35,10 @@
   - [x] Create default `config.json` template
   - [x] Test config loading and saving
 
-- [ ] Implement feature discovery
-  - [ ] Create `FeatureDiscovery.cs`
-  - [ ] Implement reflection-based feature discovery
-  - [ ] Test discovery with mock features
+- [x] Implement feature discovery
+  - [x] Create `FeatureDiscovery.cs`
+  - [x] Implement reflection-based feature discovery
+  - [x] Test discovery with mock features
 
 ---
 

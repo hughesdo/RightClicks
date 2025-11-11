@@ -47,6 +47,10 @@ public partial class App : Application
         var config = ConfigurationService.LoadConfig();
         Log.Information("Configuration loaded successfully");
 
+        // Discover features via reflection
+        FeatureDiscoveryService.DiscoverFeatures();
+        FeatureDiscoveryService.LogDiscoveredFeatures(config);
+
         // TODO: Parse other CLI arguments (--feature, --file) in future tasks
         // For now, just show the main window
     }

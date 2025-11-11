@@ -29,11 +29,11 @@
   - [x] Implement log retention (7-day rolling)
   - [x] Add CLI flags: `--test-mode`, `--clear-logs`
 
-- [ ] Implement configuration service
-  - [ ] Create `ConfigurationService.cs`
+- [x] Implement configuration service
+  - [x] Create `ConfigurationService.cs`
   - [ ] Implement JSON config read/write
-  - [ ] Create default `config.json` template
-  - [ ] Test config loading and saving
+  - [x] Create default `config.json` template
+  - [x] Test config loading and saving
 
 - [ ] Implement feature discovery
   - [ ] Create `FeatureDiscovery.cs`

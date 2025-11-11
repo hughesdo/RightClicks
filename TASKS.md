@@ -16,12 +16,12 @@
   - [x] Add NuGet packages (FFMpegCore, Serilog, Newtonsoft.Json, etc.)
   - [x] Verify solution builds successfully
 
-- [ ] Implement core interfaces and models
-  - [ ] Create `IFileFeature` interface
-  - [ ] Create `FeatureResult` model
-  - [ ] Create `Job` model
-  - [ ] Create `AppConfig` model
-  - [ ] Create `FeatureConfig` model
+- [x] Implement core interfaces and models
+  - [x] Create `IFileFeature` interface
+  - [x] Create `FeatureResult` model
+  - [x] Create `Job` model
+  - [x] Create `AppConfig` model
+  - [x] Create `FeatureConfig` model
 
 - [ ] Set up logging infrastructure
   - [ ] Configure Serilog with file sink

@@ -1,6 +1,8 @@
+using FFMpegCore;
 using RightClicks.Models;
 using Serilog;
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,21 +29,67 @@ namespace RightClicks.Features.Video
 
             try
             {
-                // TODO: Implement FFmpeg MP3 extraction in Phase 2
-                // For now, just return a placeholder result
-                Log.Warning("ExtractMp3Feature: Not yet implemented - placeholder execution");
+                // Resolve full path
+                var fullPath = Path.GetFullPath(filePath);
+                Log.Debug("Full path resolved: {FullPath}", fullPath);
 
-                await Task.Delay(100, cancellationToken); // Simulate work
+                if (!File.Exists(fullPath))
+                {
+                    Log.Error("File not found: {FullPath}", fullPath);
+                    var duration = (long)(DateTime.Now - startTime).TotalMilliseconds;
+                    return FeatureResult.CreateFailure($"File not found: {fullPath}", null, duration);
+                }
 
-                var outputPath = System.IO.Path.ChangeExtension(filePath, ".mp3");
-                var duration = (long)(DateTime.Now - startTime).TotalMilliseconds;
+                // Calculate output path: {original_name}.mp3
+                var fileNameWithoutExt = Path.GetFileNameWithoutExtension(fullPath);
+                var directory = Path.GetDirectoryName(fullPath);
+                var outputPath = Path.Combine(directory!, $"{fileNameWithoutExt}.mp3");
+                Log.Information("Output path: {OutputPath}", outputPath);
 
-                Log.Information("ExtractMp3Feature: Completed successfully (placeholder)");
+                // Check if output file already exists
+                if (File.Exists(outputPath))
+                {
+                    Log.Warning("Output file already exists, will be overwritten: {OutputPath}", outputPath);
+                }
+
+                // Extract audio to MP3 using FFmpeg
+                Log.Information("Extracting audio to MP3...");
+
+                var success = await FFMpegArguments
+                    .FromFileInput(fullPath)
+                    .OutputToFile(outputPath, overwrite: true, options => options
+                        .WithAudioCodec("libmp3lame")
+                        .WithAudioBitrate(192)
+                        .WithoutMetadata()
+                        .ForceFormat("mp3"))
+                    .CancellableThrough(cancellationToken)
+                    .ProcessAsynchronously();
+
+                if (!success)
+                {
+                    Log.Error("FFmpeg audio extraction failed");
+                    var duration = (long)(DateTime.Now - startTime).TotalMilliseconds;
+                    return FeatureResult.CreateFailure("FFmpeg audio extraction failed", null, duration);
+                }
+
+                // Verify output file was created
+                if (!File.Exists(outputPath))
+                {
+                    Log.Error("Output file was not created: {OutputPath}", outputPath);
+                    var duration = (long)(DateTime.Now - startTime).TotalMilliseconds;
+                    return FeatureResult.CreateFailure("Output file was not created", null, duration);
+                }
+
+                var outputFileInfo = new FileInfo(outputPath);
+                Log.Information("Output file created: {OutputPath} ({Size} bytes)", outputPath, outputFileInfo.Length);
+
+                var finalDuration = (long)(DateTime.Now - startTime).TotalMilliseconds;
+                Log.Information("ExtractMp3Feature: Completed successfully in {Duration}ms", finalDuration);
 
                 return FeatureResult.CreateSuccess(
-                    "MP3 extraction completed (placeholder)",
+                    $"MP3 audio extracted successfully",
                     outputPath,
-                    duration
+                    finalDuration
                 );
             }
             catch (OperationCanceledException)

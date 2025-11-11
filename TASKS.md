@@ -9,12 +9,12 @@
 ## Phase 1: Foundation
 *Setting up core infrastructure, solution structure, and base interfaces*
 
-- [ ] Create Visual Studio solution and projects
-  - [ ] Create `RightClicks.sln`
-  - [ ] Create `RightClicks` project (.NET 8, WPF)
-  - [ ] Create `RightClicksShellManager` project (.NET Framework 4.8)
-  - [ ] Add NuGet packages (FFMpegCore, Serilog, Newtonsoft.Json, etc.)
-  - [ ] Verify solution builds successfully
+- [x] Create Visual Studio solution and projects
+  - [x] Create `RightClicks.sln`
+  - [x] Create `RightClicks` project (.NET 8, WPF)
+  - [x] Create `RightClicksShellManager` project (.NET Framework 4.8)
+  - [x] Add NuGet packages (FFMpegCore, Serilog, Newtonsoft.Json, etc.)
+  - [x] Verify solution builds successfully
 
 - [ ] Implement core interfaces and models
   - [ ] Create `IFileFeature` interface

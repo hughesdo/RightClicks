@@ -22,13 +22,19 @@ public static class LoggingService
     /// Configure Serilog logging with file and console sinks.
     /// </summary>
     /// <param name="isTestMode">If true, creates an isolated timestamped log file for testing.</param>
-    /// <param name="logRetentionDays">Number of days to retain log files (default: 7).</param>
-    /// <param name="logLevel">Minimum log level (default: Verbose).</param>
+    /// <param name="logRetentionDays">Number of days to retain log files (default: 7). If null, loads from config.</param>
+    /// <param name="logLevel">Minimum log level (default: Verbose). If null, loads from config.</param>
     public static void ConfigureLogging(
         bool isTestMode = false,
-        int logRetentionDays = 7,
-        LogEventLevel logLevel = LogEventLevel.Verbose)
+        int? logRetentionDays = null,
+        LogEventLevel? logLevel = null)
     {
+        // Load config to get retention and log level settings (if not provided)
+        // Note: We can't use ConfigurationService.LoadConfig() here because it would cause circular dependency
+        // during initial startup. So we use provided defaults or load config after logging is initialized.
+        int retention = logRetentionDays ?? 7;
+        LogEventLevel level = logLevel ?? LogEventLevel.Verbose;
+
         // Determine log directory
         var logPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -48,14 +54,14 @@ public static class LoggingService
 
         // Configure Serilog
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Is(logLevel)
+            .MinimumLevel.Is(level)
             .WriteTo.Console(
                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
             )
             .WriteTo.File(
                 _currentLogFilePath,
                 rollingInterval: isTestMode ? RollingInterval.Infinite : RollingInterval.Day,
-                retainedFileCountLimit: logRetentionDays,
+                retainedFileCountLimit: retention,
                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
             )
             .CreateLogger();
@@ -65,8 +71,8 @@ public static class LoggingService
         Log.Information("Version: {Version}", Assembly.GetExecutingAssembly().GetName().Version);
         Log.Information("Test Mode: {TestMode}", isTestMode);
         Log.Information("Log File: {LogFile}", _currentLogFilePath);
-        Log.Information("Log Level: {LogLevel}", logLevel);
-        Log.Information("Log Retention Days: {RetentionDays}", logRetentionDays);
+        Log.Information("Log Level: {LogLevel}", level);
+        Log.Information("Log Retention Days: {RetentionDays}", retention);
     }
 
     /// <summary>

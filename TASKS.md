@@ -23,11 +23,11 @@
   - [x] Create `AppConfig` model
   - [x] Create `FeatureConfig` model
 
-- [ ] Set up logging infrastructure
-  - [ ] Configure Serilog with file sink
-  - [ ] Implement test mode logging (isolated log files)
-  - [ ] Implement log retention (7-day rolling)
-  - [ ] Add CLI flags: `--test-mode`, `--clear-logs`
+- [x] Set up logging infrastructure
+  - [x] Configure Serilog with file sink
+  - [x] Implement test mode logging (isolated log files)
+  - [x] Implement log retention (7-day rolling)
+  - [x] Add CLI flags: `--test-mode`, `--clear-logs`
 
 - [ ] Implement configuration service
   - [ ] Create `ConfigurationService.cs`

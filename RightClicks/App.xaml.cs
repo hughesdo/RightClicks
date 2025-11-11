@@ -24,7 +24,7 @@ public partial class App : Application
         if (_clearLogs)
         {
             // Configure minimal logging just to log the clear operation
-            LoggingService.ConfigureLogging(isTestMode: false, logRetentionDays: 7);
+            LoggingService.ConfigureLogging(isTestMode: false);
 
             int deletedCount = LoggingService.ClearLogs(testLogsOnly: _clearTestLogsOnly);
             Console.WriteLine($"Cleared {deletedCount} log files.");
@@ -34,14 +34,18 @@ public partial class App : Application
             return;
         }
 
-        // Configure logging
-        LoggingService.ConfigureLogging(isTestMode: _isTestMode, logRetentionDays: 7);
+        // Configure logging (before loading config so we can log config loading)
+        LoggingService.ConfigureLogging(isTestMode: _isTestMode);
 
         Log.Information("Application started with {ArgCount} arguments", e.Args.Length);
         if (e.Args.Length > 0)
         {
             Log.Information("Arguments: {Args}", string.Join(" ", e.Args));
         }
+
+        // Load configuration
+        var config = ConfigurationService.LoadConfig();
+        Log.Information("Configuration loaded successfully");
 
         // TODO: Parse other CLI arguments (--feature, --file) in future tasks
         // For now, just show the main window

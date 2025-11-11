@@ -52,6 +52,12 @@ public class AppSettings
     public int JobHistoryDays { get; set; } = 7;
 
     /// <summary>
+    /// Number of days to retain log files.
+    /// Default: 7 days
+    /// </summary>
+    public int LogRetentionDays { get; set; } = 7;
+
+    /// <summary>
     /// Whether to check for updates on startup.
     /// Default: true
     /// </summary>

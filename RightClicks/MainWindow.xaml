@@ -3,10 +3,577 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:RightClicks"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="RightClicks - Configuration"
+        Height="600"
+        Width="800"
+        MinHeight="500"
+        MinWidth="700"
+        WindowStartupLocation="CenterScreen"
+        Closing="Window_Closing">
 
+    <Window.Resources>
+        <!-- Converters -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+
+        <!-- Modern Windows 11 style colors -->
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#0078D4"/>
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#F3F3F3"/>
+        <SolidColorBrush x:Key="CardBrush" Color="White"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#E1E1E1"/>
+        <SolidColorBrush x:Key="TextBrush" Color="#1F1F1F"/>
+        <SolidColorBrush x:Key="SecondaryTextBrush" Color="#605E5C"/>
+
+        <!-- Tab style -->
+        <Style TargetType="TabItem">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <!-- Button style -->
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#005A9E"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#CCCCCC"/>
+                    <Setter Property="Foreground" Value="#888888"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="{StaticResource BackgroundBrush}">
+        <TabControl x:Name="MainTabControl"
+                    Margin="10"
+                    Background="{StaticResource CardBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1">
+
+            <!-- Tab 1: Main Config -->
+            <TabItem Header="Main Config">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="20">
+
+                        <!-- Header -->
+                        <TextBlock Text="Feature Configuration"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource TextBrush}"
+                                   Margin="0,0,0,20"/>
+
+                        <!-- Shell Integration & System Controls -->
+                        <Border Background="{StaticResource CardBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="15"
+                                Margin="0,0,0,20">
+                            <StackPanel>
+                                <!-- Shell Hooks Section -->
+                                <TextBlock Text="Shell Integration (Windows Explorer Context Menu)"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}"
+                                           Margin="0,0,0,10"/>
+
+                                <Grid Margin="0,0,0,15">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button Grid.Column="0"
+                                            Content="🗑️ Uninstall All Shell Hooks"
+                                            x:Name="UninstallShellHooksButton"
+                                            Click="UninstallShellHooksButton_Click"
+                                            HorizontalAlignment="Stretch"
+                                            Background="#D32F2F"
+                                            Foreground="White"
+                                            Padding="10,8"/>
+
+                                    <Button Grid.Column="2"
+                                            Content="✅ Install Selected Shell Hooks"
+                                            x:Name="InstallShellHooksButton"
+                                            Click="InstallShellHooksButton_Click"
+                                            HorizontalAlignment="Stretch"
+                                            Background="#388E3C"
+                                            Foreground="White"
+                                            Padding="10,8"/>
+                                </Grid>
+
+                                <!-- System Tray Startup Section -->
+                                <TextBlock Text="System Tray Startup"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}"
+                                           Margin="0,0,0,10"/>
+
+                                <Grid Margin="0,0,0,15">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button Grid.Column="0"
+                                            Content="🚫 Uninstall SysTray Startup"
+                                            x:Name="UninstallStartupButton"
+                                            Click="UninstallStartupButton_Click"
+                                            HorizontalAlignment="Stretch"
+                                            Padding="10,8"/>
+
+                                    <Button Grid.Column="2"
+                                            Content="🚀 Install SysTray Startup"
+                                            x:Name="InstallStartupButton"
+                                            Click="InstallStartupButton_Click"
+                                            HorizontalAlignment="Stretch"
+                                            Padding="10,8"/>
+                                </Grid>
+
+                                <!-- Maintenance Section -->
+                                <TextBlock Text="Maintenance"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}"
+                                           Margin="0,0,0,10"/>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button Grid.Column="0"
+                                            Content="🔄 Check for Updates"
+                                            x:Name="CheckForUpdatesButton"
+                                            Click="CheckForUpdatesButton_Click"
+                                            HorizontalAlignment="Stretch"
+                                            Padding="10,8"/>
+
+                                    <Button Grid.Column="2"
+                                            Content="📁 Open Logs Folder"
+                                            x:Name="OpenLogsFolderButton"
+                                            Click="OpenLogsFolderButton_Click"
+                                            HorizontalAlignment="Stretch"
+                                            Padding="10,8"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Features List (Accordion Style) -->
+                        <TextBlock Text="Available Features"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextBrush}"
+                                   Margin="0,0,0,10"/>
+
+                        <ItemsControl x:Name="FeaturesListControl" Margin="0,0,0,30">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Expander IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
+                                              Margin="0,0,0,10">
+                                        <Expander.Header>
+                                            <Border Background="{StaticResource CardBrush}"
+                                                    BorderBrush="{StaticResource BorderBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="4"
+                                                    Padding="15">
+                                                <TextBlock Text="{Binding HeaderText}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{StaticResource TextBrush}"/>
+                                            </Border>
+                                        </Expander.Header>
+
+                                        <Border Background="{StaticResource BackgroundBrush}"
+                                                BorderBrush="{StaticResource BorderBrush}"
+                                                BorderThickness="1,0,1,1"
+                                                CornerRadius="0,0,4,4"
+                                                Padding="10">
+                                            <ItemsControl ItemsSource="{Binding Features}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="{StaticResource CardBrush}"
+                                                                BorderBrush="{StaticResource BorderBrush}"
+                                                                BorderThickness="1"
+                                                                CornerRadius="4"
+                                                                Padding="15"
+                                                                Margin="0,0,0,8">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <StackPanel Grid.Column="0">
+                                                                    <TextBlock Text="{Binding DisplayName}"
+                                                                               FontSize="13"
+                                                                               FontWeight="SemiBold"
+                                                                               Foreground="{StaticResource TextBrush}"/>
+                                                                    <TextBlock Text="{Binding Description}"
+                                                                               FontSize="11"
+                                                                               Foreground="{StaticResource SecondaryTextBrush}"
+                                                                               Margin="0,4,0,4"
+                                                                               TextWrapping="Wrap"/>
+                                                                    <TextBlock FontSize="10"
+                                                                               Foreground="{StaticResource SecondaryTextBrush}">
+                                                                        <Run Text="Supported:"/>
+                                                                        <Run Text="{Binding SupportedExtensionsText}"/>
+                                                                    </TextBlock>
+                                                                </StackPanel>
+
+                                                                <CheckBox Grid.Column="1"
+                                                                          IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                                                                          VerticalAlignment="Center"
+                                                                          Margin="15,0,0,0"
+                                                                          Checked="FeatureToggle_Changed"
+                                                                          Unchecked="FeatureToggle_Changed"/>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </Border>
+                                    </Expander>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Concurrent Jobs Setting -->
+                        <TextBlock Text="Job Queue Settings"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextBrush}"
+                                   Margin="0,10,0,10"/>
+
+                        <Border Background="{StaticResource CardBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="15">
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Text="Maximum Concurrent Jobs"
+                                               FontSize="14"
+                                               Foreground="{StaticResource TextBrush}"
+                                               VerticalAlignment="Center"/>
+
+                                    <TextBlock Grid.Column="1"
+                                               x:Name="ConcurrentJobsValueText"
+                                               Text="3"
+                                               FontSize="18"
+                                               FontWeight="Bold"
+                                               Foreground="{StaticResource PrimaryBrush}"
+                                               VerticalAlignment="Center"
+                                               Margin="10,0,0,0"/>
+                                </Grid>
+
+                                <Slider x:Name="ConcurrentJobsSlider"
+                                        Minimum="1"
+                                        Maximum="10"
+                                        Value="3"
+                                        TickFrequency="1"
+                                        IsSnapToTickEnabled="True"
+                                        Margin="0,10,0,10"
+                                        ValueChanged="ConcurrentJobsSlider_ValueChanged"/>
+
+                                <TextBlock Text="Controls how many jobs can run simultaneously in the background."
+                                           FontSize="12"
+                                           Foreground="{StaticResource SecondaryTextBrush}"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Save Button -->
+                        <Button Content="Save Configuration"
+                                x:Name="SaveConfigButton"
+                                HorizontalAlignment="Right"
+                                Margin="0,20,0,0"
+                                Click="SaveConfigButton_Click"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Tab 2: API Config -->
+            <TabItem Header="API Config">
+                <Grid Margin="20">
+                    <TextBlock Text="API Config Tab - API key configuration coming next!"
+                               FontSize="16"
+                               Foreground="{StaticResource TextBrush}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Grid>
+            </TabItem>
+
+            <!-- Tab 3: Clipboard Manipulations -->
+            <TabItem Header="Clipboard">
+                <Grid Margin="20">
+                    <TextBlock FontSize="16" Foreground="{StaticResource SecondaryTextBrush}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Run Text="Clipboard Manipulations" FontWeight="Bold" FontSize="18"/>
+                        <LineBreak/><LineBreak/>
+                        <Run Text="Coming in Phase 5+"/>
+                        <LineBreak/>
+                        <Run Text="(Features from TransformClipboard project)"/>
+                    </TextBlock>
+                </Grid>
+            </TabItem>
+
+            <!-- Tab 4: Queued Jobs -->
+            <TabItem Header="Queued Jobs" x:Name="QueuedJobsTab">
+                <Grid Margin="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="Job Queue"
+                                       FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource TextBrush}"
+                                       VerticalAlignment="Center"/>
+
+                            <Button Grid.Column="1"
+                                    Content="Clear Completed"
+                                    x:Name="ClearCompletedButton"
+                                    Click="ClearCompletedButton_Click"
+                                    Padding="15,8"/>
+                        </Grid>
+
+                        <TextBlock x:Name="JobCountText"
+                                   Text="0 jobs in queue"
+                                   FontSize="12"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
+
+                    <!-- Jobs List -->
+                    <Border Grid.Row="1"
+                            Background="{StaticResource CardBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4">
+
+                        <Grid>
+                            <!-- Empty State -->
+                            <TextBlock x:Name="EmptyStateText"
+                                       FontSize="14"
+                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Center"
+                                       Visibility="Visible">
+                                <Run Text="No jobs in queue" FontWeight="SemiBold" FontSize="16"/>
+                                <LineBreak/><LineBreak/>
+                                <Run Text="Right-click files in Windows Explorer to add jobs,"/>
+                                <LineBreak/>
+                                <Run Text="or use the CLI: RightClicks.exe --feature ExtractMp3 --file video.mp4"/>
+                            </TextBlock>
+
+                            <!-- Jobs DataGrid -->
+                            <DataGrid x:Name="JobsDataGrid"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  SelectionMode="Single"
+                                  GridLinesVisibility="Horizontal"
+                                  HeadersVisibility="Column"
+                                  CanUserResizeRows="False"
+                                  CanUserSortColumns="True"
+                                  Background="Transparent"
+                                  BorderThickness="0"
+                                  RowHeight="60"
+                                  Visibility="Collapsed">
+
+                            <DataGrid.Columns>
+
+                                <!-- Status Icon -->
+                                <DataGridTextColumn Header="Status" Width="80" Binding="{Binding StatusIcon}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontSize" Value="20"/>
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                                <!-- Feature Name -->
+                                <DataGridTextColumn Header="Feature" Width="150" Binding="{Binding FeatureName}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                                <!-- File Name -->
+                                <DataGridTextColumn Header="File" Width="*" Binding="{Binding FileName}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                                <!-- Status Text -->
+                                <DataGridTextColumn Header="Status" Width="120" Binding="{Binding StatusText}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                                <!-- Duration/Elapsed Time -->
+                                <DataGridTextColumn Header="Duration" Width="100" Binding="{Binding DurationText}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                                <!-- Actions -->
+                                <DataGridTemplateColumn Header="Actions" Width="120">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <!-- Cancel Button (for Running jobs) -->
+                                                <Button Content="⏹️ Cancel"
+                                                        Padding="8,4"
+                                                        Margin="2"
+                                                        Click="CancelJobButton_Click"
+                                                        Tag="{Binding JobId}"
+                                                        Visibility="{Binding CanCancel, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                                                <!-- Remove Button (for Pending jobs) -->
+                                                <Button Content="🗑️ Remove"
+                                                        Padding="8,4"
+                                                        Margin="2"
+                                                        Click="RemoveJobButton_Click"
+                                                        Tag="{Binding JobId}"
+                                                        Visibility="{Binding CanRemove, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                            </DataGrid.Columns>
+
+                            </DataGrid>
+                        </Grid>
+
+                    </Border>
+
+                    <!-- Status Bar -->
+                    <Border Grid.Row="2"
+                            Background="{StaticResource CardBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="15,10"
+                            Margin="0,10,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                <TextBlock Text="Running: "
+                                           FontSize="12"
+                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+                                <TextBlock x:Name="RunningCountText"
+                                           Text="0"
+                                           FontSize="12"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource PrimaryBrush}"/>
+
+                                <TextBlock Text=" | Pending: "
+                                           FontSize="12"
+                                           Foreground="{StaticResource SecondaryTextBrush}"
+                                           Margin="15,0,0,0"/>
+                                <TextBlock x:Name="PendingCountText"
+                                           Text="0"
+                                           FontSize="12"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource SecondaryTextBrush}"/>
+
+                                <TextBlock Text=" | Completed: "
+                                           FontSize="12"
+                                           Foreground="{StaticResource SecondaryTextBrush}"
+                                           Margin="15,0,0,0"/>
+                                <TextBlock x:Name="CompletedCountText"
+                                           Text="0"
+                                           FontSize="12"
+                                           FontWeight="Bold"
+                                           Foreground="#28A745"/>
+
+                                <TextBlock Text=" | Failed: "
+                                           FontSize="12"
+                                           Foreground="{StaticResource SecondaryTextBrush}"
+                                           Margin="15,0,0,0"/>
+                                <TextBlock x:Name="FailedCountText"
+                                           Text="0"
+                                           FontSize="12"
+                                           FontWeight="Bold"
+                                           Foreground="#DC3545"/>
+                            </StackPanel>
+
+                            <TextBlock Grid.Column="1"
+                                       x:Name="MaxConcurrentJobsText"
+                                       Text="Max concurrent: 3"
+                                       FontSize="11"
+                                       Foreground="{StaticResource SecondaryTextBrush}"/>
+                        </Grid>
+                    </Border>
+
+                </Grid>
+            </TabItem>
+
+        </TabControl>
     </Grid>
 </Window>

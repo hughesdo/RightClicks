@@ -20,6 +20,7 @@ public partial class MainWindow : Window
     private ObservableCollection<FeatureViewModel> _features = new();
     private ObservableCollection<FeatureGroupViewModel> _featureGroups = new();
     private ObservableCollection<JobViewModel> _jobViewModels = new();
+    private ObservableCollection<ApiKeyViewModel> _apiKeys = new();
     private AppConfig _config = null!;
     private JobQueueService? _jobQueueService;
     private DispatcherTimer? _uiUpdateTimer;
@@ -30,6 +31,7 @@ public partial class MainWindow : Window
         Log.Information("MainWindow initialized");
 
         LoadConfiguration();
+        LoadApiKeys();
         InitializeJobQueue();
     }
 
@@ -228,6 +230,253 @@ public partial class MainWindow : Window
             );
         }
     }
+
+    #region API Key Management
+
+    /// <summary>
+    /// Load API keys from config and environment variables.
+    /// </summary>
+    private void LoadApiKeys()
+    {
+        Log.Information("Loading API keys configuration...");
+
+        _apiKeys.Clear();
+
+        // Load existing API keys from config
+        foreach (var kvp in _config.ApiKeys)
+        {
+            var serviceName = kvp.Key;
+            var envVarName = kvp.Value;
+
+            // Try to read the actual API key from environment variable
+            var apiKeyValue = Environment.GetEnvironmentVariable(envVarName, EnvironmentVariableTarget.User);
+
+            _apiKeys.Add(new ApiKeyViewModel
+            {
+                ServiceName = serviceName,
+                EnvironmentVariableName = envVarName,
+                ApiKeyValue = apiKeyValue ?? string.Empty,
+                IsExistingEntry = true
+            });
+        }
+
+        // Sort by service name
+        var sortedKeys = _apiKeys.OrderBy(k => k.ServiceName, StringComparer.OrdinalIgnoreCase).ToList();
+        _apiKeys.Clear();
+        foreach (var key in sortedKeys)
+        {
+            _apiKeys.Add(key);
+        }
+
+        // Add one blank row for new entries
+        _apiKeys.Add(new ApiKeyViewModel
+        {
+            ServiceName = string.Empty,
+            EnvironmentVariableName = string.Empty,
+            ApiKeyValue = string.Empty,
+            IsExistingEntry = false
+        });
+
+        // Bind to UI
+        if (ApiKeysDataGrid != null)
+        {
+            ApiKeysDataGrid.ItemsSource = _apiKeys;
+        }
+
+        Log.Information("API keys loaded. {Count} existing entries", _config.ApiKeys.Count);
+    }
+
+    /// <summary>
+    /// Save API configuration button click handler.
+    /// </summary>
+    private void SaveApiConfigButton_Click(object sender, RoutedEventArgs e)
+    {
+        Log.Information("Saving API configuration...");
+
+        try
+        {
+            var validEntries = new List<ApiKeyViewModel>();
+            var hasErrors = false;
+
+            // Validate all non-empty rows
+            foreach (var apiKey in _apiKeys)
+            {
+                // Skip completely empty rows
+                if (string.IsNullOrWhiteSpace(apiKey.ServiceName) &&
+                    string.IsNullOrWhiteSpace(apiKey.EnvironmentVariableName) &&
+                    string.IsNullOrWhiteSpace(apiKey.ApiKeyValue))
+                {
+                    continue;
+                }
+
+                // Validate partially filled rows
+                if (string.IsNullOrWhiteSpace(apiKey.ServiceName))
+                {
+                    MessageBox.Show("Service Name is required for all entries.", "Validation Error",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    hasErrors = true;
+                    break;
+                }
+
+                if (string.IsNullOrWhiteSpace(apiKey.EnvironmentVariableName))
+                {
+                    MessageBox.Show($"Environment Variable Name is required for '{apiKey.ServiceName}'.",
+                        "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    hasErrors = true;
+                    break;
+                }
+
+                if (string.IsNullOrWhiteSpace(apiKey.ApiKeyValue))
+                {
+                    MessageBox.Show($"API Key Value is required for '{apiKey.ServiceName}'.",
+                        "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    hasErrors = true;
+                    break;
+                }
+
+                if (apiKey.ApiKeyValue.Length < 10)
+                {
+                    MessageBox.Show($"API Key Value for '{apiKey.ServiceName}' is too short (minimum 10 characters).",
+                        "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    hasErrors = true;
+                    break;
+                }
+
+                validEntries.Add(apiKey);
+            }
+
+            if (hasErrors) return;
+
+            if (validEntries.Count == 0)
+            {
+                MessageBox.Show("No valid API key entries to save.", "Validation Error",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Update config and environment variables
+            _config.ApiKeys.Clear();
+
+            foreach (var apiKey in validEntries)
+            {
+                // Write API key to environment variable
+                Environment.SetEnvironmentVariable(
+                    apiKey.EnvironmentVariableName,
+                    apiKey.ApiKeyValue,
+                    EnvironmentVariableTarget.User
+                );
+
+                // Add to config (service name -> env var name mapping)
+                _config.ApiKeys[apiKey.ServiceName] = apiKey.EnvironmentVariableName;
+
+                Log.Information("Saved API key for service: {ServiceName} -> {EnvVarName}",
+                    apiKey.ServiceName, apiKey.EnvironmentVariableName);
+            }
+
+            // Save config to file
+            ConfigurationService.SaveConfig(_config);
+
+            Log.Information("API configuration saved successfully. {Count} entries", validEntries.Count);
+            MessageBox.Show(
+                "API configuration saved successfully!",
+                "RightClicks",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
+
+            // Reload API keys to refresh UI
+            LoadApiKeys();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to save API configuration");
+            MessageBox.Show(
+                $"Failed to save API configuration:\n{ex.Message}",
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+        }
+    }
+
+    /// <summary>
+    /// Delete API key button click handler.
+    /// </summary>
+    private void DeleteApiKeyButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Button button) return;
+        if (button.DataContext is not ApiKeyViewModel apiKey) return;
+
+        Log.Information("Deleting API key: {ServiceName}", apiKey.ServiceName);
+
+        try
+        {
+            // Remove from config
+            _config.ApiKeys.Remove(apiKey.ServiceName);
+
+            // Save config
+            ConfigurationService.SaveConfig(_config);
+
+            // Remove from UI
+            _apiKeys.Remove(apiKey);
+
+            Log.Information("API key deleted successfully: {ServiceName}", apiKey.ServiceName);
+            MessageBox.Show(
+                $"API key for '{apiKey.ServiceName}' deleted successfully.\n\n" +
+                "Note: The environment variable was not deleted and can still be used by other applications.",
+                "RightClicks",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to delete API key: {ServiceName}", apiKey.ServiceName);
+            MessageBox.Show(
+                $"Failed to delete API key:\n{ex.Message}",
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+        }
+    }
+
+    /// <summary>
+    /// Toggle password visibility button click handler.
+    /// </summary>
+    private void TogglePasswordVisibility_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Button button) return;
+        if (button.DataContext is not ApiKeyViewModel apiKey) return;
+
+        apiKey.IsPasswordVisible = !apiKey.IsPasswordVisible;
+    }
+
+    /// <summary>
+    /// PasswordBox loaded event handler - sync initial value from ViewModel.
+    /// </summary>
+    private void PasswordBox_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.PasswordBox passwordBox) return;
+        if (passwordBox.DataContext is not ApiKeyViewModel apiKey) return;
+
+        // Set initial password value
+        passwordBox.Password = apiKey.ApiKeyValue;
+    }
+
+    /// <summary>
+    /// PasswordBox password changed event handler - sync to ViewModel.
+    /// </summary>
+    private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.PasswordBox passwordBox) return;
+        if (passwordBox.DataContext is not ApiKeyViewModel apiKey) return;
+
+        // Update ViewModel when password changes
+        apiKey.ApiKeyValue = passwordBox.Password;
+    }
+
+    #endregion
 
     #region Job Queue Management
 
@@ -1013,6 +1262,81 @@ public class FeatureGroupViewModel : INotifyPropertyChanged
             }
         }
     }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}
+
+/// <summary>
+/// View model for API key configuration display in UI
+/// </summary>
+public class ApiKeyViewModel : INotifyPropertyChanged
+{
+    private string _serviceName = string.Empty;
+    private string _environmentVariableName = string.Empty;
+    private string _apiKeyValue = string.Empty;
+    private bool _isPasswordVisible = false;
+
+    public string ServiceName
+    {
+        get => _serviceName;
+        set
+        {
+            if (_serviceName != value)
+            {
+                _serviceName = value;
+                OnPropertyChanged(nameof(ServiceName));
+            }
+        }
+    }
+
+    public string EnvironmentVariableName
+    {
+        get => _environmentVariableName;
+        set
+        {
+            if (_environmentVariableName != value)
+            {
+                _environmentVariableName = value;
+                OnPropertyChanged(nameof(EnvironmentVariableName));
+            }
+        }
+    }
+
+    public string ApiKeyValue
+    {
+        get => _apiKeyValue;
+        set
+        {
+            if (_apiKeyValue != value)
+            {
+                _apiKeyValue = value;
+                OnPropertyChanged(nameof(ApiKeyValue));
+            }
+        }
+    }
+
+    public bool IsPasswordVisible
+    {
+        get => _isPasswordVisible;
+        set
+        {
+            if (_isPasswordVisible != value)
+            {
+                _isPasswordVisible = value;
+                OnPropertyChanged(nameof(IsPasswordVisible));
+                OnPropertyChanged(nameof(VisibilityIcon));
+            }
+        }
+    }
+
+    public string VisibilityIcon => IsPasswordVisible ? "🙈" : "👁️";
+
+    public bool IsExistingEntry { get; set; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

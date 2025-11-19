@@ -19,46 +19,121 @@ You are the **primary developer and tester** for this project. The user (Don) wo
 4. **Report results clearly** so Don can do final acceptance testing
 5. **Update TASKS.md** only after Don personally tests and approves
 
+## Development Philosophy
+
+**"Everything On by Default"**
+
+During development and testing:
+- ✅ **All features enabled** - Validates nothing breaks
+- ✅ **All APIs configured** - Catches missing environment variables early
+- ✅ **Full stack testing** - Ensures features play nicely together
+- ✅ **Fresh config validation** - Prevents stale settings from causing issues
+
+End users can disable features later via UI. Our job is to validate the **complete system**.
+
+**Why This Matters:**
+- Catches integration issues early (e.g., Cloudinary config missing from default config)
+- Validates all code paths (e.g., all lip sync models tested together)
+- Ensures config.json stays in sync with code (auto-discovery + auto-enable)
+- Prevents "works on my machine" problems (environment variables validated)
+- Avoids stale DLLs and config files (explicit cleanup steps)
+
 ## Development Workflow (CRITICAL)
 
 ### For Every Task:
 
 1. **Implement Everywhere:**
    - Write the feature code (e.g., `ExtractMp3Feature.cs`)
-   - Add to UI toggles (if UI exists)
-   - Add to default `config.json`
-   - Update any related components
+   - ✅ **Feature will be auto-discovered** - No manual registration needed!
+   - ✅ **Feature will be auto-enabled** - `CreateDefaultConfig()` enables all features
+   - ⚠️ **If adding new API:** Add to `ApiKeys` dictionary in `CreateDefaultConfig()` (ConfigurationService.cs)
+   - ⚠️ **If adding new cloud service:** Add config section to `CreateDefaultConfig()` (ConfigurationService.cs)
+   - Add to UI toggles (if UI exists) - UI reads from config.json
 
-2. **Test via CLI:**
+1.5. **Verify Implementation Completeness:**
+   - [ ] Feature class created in correct namespace (e.g., `RightClicks.Features.Video`)
+   - [ ] Feature implements `IFileFeature` interface
+   - [ ] Feature will be auto-discovered (not abstract, has public parameterless constructor)
+   - [ ] If cloud-based: Uses `CloudinaryStorageService` or `FileHostingService`
+   - [ ] If API-based: API key added to `CreateDefaultConfig()` in `ConfigurationService.cs`
+   - [ ] Environment variables documented (if new ones added)
+
+2. **Kill RightClicks and Restart Windows Explorer Before Building:**
+   ```powershell
+   taskkill /F /IM RightClicks.exe
+   taskkill /F /IM explorer.exe
+   Start-Process explorer.exe
+   ```
+   - **ALWAYS** kill RightClicks before building
+   - **ALWAYS** restart Windows Explorer before building
+   - Windows Explorer locks the shell extension DLL (RightClicksShellExtension.dll)
+   - Prevents file locking errors during build
+   - Required for successful deployment to %LOCALAPPDATA%\RightClicks\
+   - Wait a few seconds after restarting Explorer before building
+
+3. **Build the Project:**
+   ```powershell
+   dotnet build --verbosity minimal
+   ```
+   - Verify no compilation errors
+   - Should have no file copy errors if Explorer was restarted
+
+3.5. **Verify Deployment:**
+   ```powershell
+   # Check that files were copied to %LOCALAPPDATA%\RightClicks\
+   Get-ChildItem "$env:LOCALAPPDATA\RightClicks\" | Select-Object Name, LastWriteTime | Format-Table -AutoSize
+
+   # Verify config.json exists and is valid JSON
+   Get-Content "$env:LOCALAPPDATA\RightClicks\config.json" | ConvertFrom-Json | Out-Null
+   Write-Host "✅ config.json is valid" -ForegroundColor Green
+
+   # Check for required environment variables
+   @("FAL_KEY", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET") | ForEach-Object {
+       $val = [Environment]::GetEnvironmentVariable($_, "User")
+       if ($val) { Write-Host "✅ $_" -ForegroundColor Green }
+       else { Write-Host "⚠️ $_ (NOT SET)" -ForegroundColor Yellow }
+   }
+   ```
+   - Verify all DLLs have recent timestamps (within last few minutes)
+   - Verify config.json contains all features (check feature count in logs)
+   - Verify required environment variables are set
+
+4. **Test via CLI:**
    ```bash
    RightClicks.exe --feature <FeatureId> --file <TestFile> --test-mode
    ```
+   - Use full path to test file (e.g., `testfiles\Deleted_Models.mp4`)
+   - Feature ID must match the `Id` property in the feature class
 
-3. **Examine Logs:**
-   - Open `RightClicks-TEST-YYYYMMDD-HHMMSS.log`
+5. **Examine Logs:**
+   - Open `RightClicks-TEST-YYYYMMDD-HHMMSS.log` in %LOCALAPPDATA%\RightClicks\logs\
    - Verify feature executed correctly
    - Check for errors, warnings, or issues
    - Confirm output file created with correct name
+   - Use PowerShell to read logs:
+     ```powershell
+     Get-Content "$env:LOCALAPPDATA\RightClicks\logs\RightClicks-TEST-*.log" | Select-Object -Last 100
+     ```
 
-4. **Test via Context Menu (if applicable):**
+6. **Test via Context Menu (if applicable):**
    - Right-click test file in Windows Explorer
    - Select feature from RightClicks menu
    - Verify job appears in queue
    - Check notification on completion
 
-5. **Report to Don:**
+7. **Report to Don:**
    - Feature implemented: ✅
    - CLI test passed: ✅
    - Output file correct: ✅
    - Logs clean: ✅
    - Ready for your testing
 
-6. **Wait for Don's Approval:**
+8. **Wait for Don's Approval:**
    - Don will test personally
    - Don will say "move on" or provide feedback
    - **ONLY THEN** update TASKS.md to mark task complete
 
-7. **Clean Up:**
+9. **Clean Up:**
    ```bash
    RightClicks.exe --clear-logs --test-only
    ```
@@ -192,6 +267,33 @@ You are the **primary developer and tester** for this project. The user (Don) wo
 **Config:** `%LOCALAPPDATA%\RightClicks\config.json`
 **FFmpeg:** `%LOCALAPPDATA%\RightClicks\bin\ffmpeg.exe`
 
+## Required Environment Variables
+
+**For Development/Testing (All Features Enabled by Default):**
+- `FAL_KEY` - fal.ai API key (required for all lip sync features)
+- `CLOUDINARY_API_KEY` - Cloudinary API key (required for file hosting)
+- `CLOUDINARY_API_SECRET` - Cloudinary API secret (required for file deletion)
+- `OPENAI_API_KEY` - OpenAI API key (required for transcription features - future)
+
+**Verify All Set:**
+```powershell
+@("FAL_KEY", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET", "OPENAI_API_KEY") | ForEach-Object {
+    $val = [Environment]::GetEnvironmentVariable($_, "User")
+    if ($val) { Write-Host "✅ $_" -ForegroundColor Green }
+    else { Write-Host "❌ $_ (NOT SET)" -ForegroundColor Red }
+}
+```
+
+**Set Missing Variables:**
+```powershell
+[Environment]::SetEnvironmentVariable("FAL_KEY", "your-key-here", "User")
+[Environment]::SetEnvironmentVariable("CLOUDINARY_API_KEY", "your-key-here", "User")
+[Environment]::SetEnvironmentVariable("CLOUDINARY_API_SECRET", "your-secret-here", "User")
+[Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "your-key-here", "User")
+```
+
+**Note:** After setting environment variables, restart your terminal/IDE for changes to take effect.
+
 ## Quick Reference Commands
 
 ```bash
@@ -203,6 +305,10 @@ RightClicks.exe --clear-logs --test-only
 
 # Clear all logs
 RightClicks.exe --clear-logs
+
+# Force regenerate config.json (deletes existing, creates fresh with all features)
+Remove-Item "$env:LOCALAPPDATA\RightClicks\config.json" -Force
+RightClicks.exe --help  # Any command will trigger config regeneration
 
 # Install shell hooks (requires admin)
 RightClicksShellManager.exe /install

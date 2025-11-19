@@ -22,6 +22,8 @@ namespace RightClicks.Features.Video
 
         public string[] SupportedExtensions => new[] { ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm" };
 
+        public bool IsCloudBased => false;
+
         public async Task<FeatureResult> ExecuteAsync(string filePath, CancellationToken cancellationToken)
         {
             var startTime = DateTime.Now;

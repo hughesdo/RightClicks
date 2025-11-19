@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private ObservableCollection<FeatureGroupViewModel> _featureGroups = new();
     private ObservableCollection<JobViewModel> _jobViewModels = new();
     private ObservableCollection<ApiKeyViewModel> _apiKeys = new();
+    private CloudinaryConfigViewModel _cloudinaryConfig = new();
     private AppConfig _config = null!;
     private JobQueueService? _jobQueueService;
     private DispatcherTimer? _uiUpdateTimer;
@@ -32,6 +33,7 @@ public partial class MainWindow : Window
 
         LoadConfiguration();
         LoadApiKeys();
+        LoadCloudinaryConfig();
         InitializeJobQueue();
     }
 
@@ -474,6 +476,225 @@ public partial class MainWindow : Window
 
         // Update ViewModel when password changes
         apiKey.ApiKeyValue = passwordBox.Password;
+    }
+
+    #endregion
+
+    #region Cloudinary Configuration Management
+
+    /// <summary>
+    /// Load Cloudinary configuration from config and environment variables.
+    /// </summary>
+    private void LoadCloudinaryConfig()
+    {
+        Log.Information("Loading Cloudinary configuration...");
+
+        _cloudinaryConfig.CloudName = _config.Cloudinary.CloudName;
+
+        // Load API key from environment variable
+        var apiKey = Environment.GetEnvironmentVariable(
+            _config.Cloudinary.ApiKeyEnvVar,
+            EnvironmentVariableTarget.User);
+        _cloudinaryConfig.ApiKey = apiKey ?? string.Empty;
+
+        // Load API secret from environment variable
+        var apiSecret = Environment.GetEnvironmentVariable(
+            _config.Cloudinary.ApiSecretEnvVar,
+            EnvironmentVariableTarget.User);
+        _cloudinaryConfig.ApiSecret = apiSecret ?? string.Empty;
+
+        // Sync UI elements with ViewModel values
+        if (CloudinaryCloudNameTextBox != null)
+        {
+            CloudinaryCloudNameTextBox.Text = _cloudinaryConfig.CloudName;
+        }
+
+        if (CloudinaryApiKeyPasswordBox != null)
+        {
+            CloudinaryApiKeyPasswordBox.Password = _cloudinaryConfig.ApiKey;
+        }
+
+        if (CloudinaryApiSecretPasswordBox != null)
+        {
+            CloudinaryApiSecretPasswordBox.Password = _cloudinaryConfig.ApiSecret;
+        }
+
+        Log.Information("Cloudinary configuration loaded (Cloud Name: {CloudName})", _cloudinaryConfig.CloudName);
+    }
+
+    /// <summary>
+    /// Save Cloudinary configuration button click handler.
+    /// </summary>
+    private void SaveCloudinaryConfigButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            // Validation
+            if (string.IsNullOrWhiteSpace(_cloudinaryConfig.CloudName))
+            {
+                MessageBox.Show("Cloud Name is required.",
+                    "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_cloudinaryConfig.ApiKey))
+            {
+                MessageBox.Show("API Key is required.",
+                    "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (_cloudinaryConfig.ApiKey.Length < 10)
+            {
+                MessageBox.Show("API Key is too short (minimum 10 characters).",
+                    "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_cloudinaryConfig.ApiSecret))
+            {
+                MessageBox.Show("API Secret is required.",
+                    "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (_cloudinaryConfig.ApiSecret.Length < 10)
+            {
+                MessageBox.Show("API Secret is too short (minimum 10 characters).",
+                    "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Update config
+            _config.Cloudinary.CloudName = _cloudinaryConfig.CloudName;
+
+            // Set environment variables
+            Environment.SetEnvironmentVariable(
+                _config.Cloudinary.ApiKeyEnvVar,
+                _cloudinaryConfig.ApiKey,
+                EnvironmentVariableTarget.User);
+
+            Environment.SetEnvironmentVariable(
+                _config.Cloudinary.ApiSecretEnvVar,
+                _cloudinaryConfig.ApiSecret,
+                EnvironmentVariableTarget.User);
+
+            // Save config to file
+            ConfigurationService.SaveConfig(_config);
+
+            Log.Information("Cloudinary configuration saved successfully (Cloud Name: {CloudName})", _cloudinaryConfig.CloudName);
+            MessageBox.Show(
+                "Cloudinary configuration saved successfully!\n\n" +
+                "Environment variables created:\n" +
+                $"• {_config.Cloudinary.ApiKeyEnvVar}\n" +
+                $"• {_config.Cloudinary.ApiSecretEnvVar}\n\n" +
+                "Note: You may need to restart RightClicks for changes to take effect.",
+                "RightClicks",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+
+            // Reload configuration to refresh UI
+            LoadCloudinaryConfig();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to save Cloudinary configuration");
+            MessageBox.Show(
+                $"Failed to save Cloudinary configuration:\n{ex.Message}",
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
+    /// Cloud Name TextBox changed event handler.
+    /// </summary>
+    private void CloudinaryCloudNameTextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        _cloudinaryConfig.CloudName = CloudinaryCloudNameTextBox.Text;
+    }
+
+    /// <summary>
+    /// Cloudinary API Key PasswordBox changed event handler.
+    /// </summary>
+    private void CloudinaryApiKeyPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        _cloudinaryConfig.ApiKey = CloudinaryApiKeyPasswordBox.Password;
+    }
+
+    /// <summary>
+    /// Cloudinary API Key TextBox changed event handler.
+    /// </summary>
+    private void CloudinaryApiKeyTextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        _cloudinaryConfig.ApiKey = CloudinaryApiKeyTextBox.Text;
+    }
+
+    /// <summary>
+    /// Cloudinary API Secret PasswordBox changed event handler.
+    /// </summary>
+    private void CloudinaryApiSecretPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        _cloudinaryConfig.ApiSecret = CloudinaryApiSecretPasswordBox.Password;
+    }
+
+    /// <summary>
+    /// Cloudinary API Secret TextBox changed event handler.
+    /// </summary>
+    private void CloudinaryApiSecretTextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        _cloudinaryConfig.ApiSecret = CloudinaryApiSecretTextBox.Text;
+    }
+
+    /// <summary>
+    /// Toggle Cloudinary API Key visibility button click handler.
+    /// </summary>
+    private void ToggleCloudinaryApiKeyVisibility_Click(object sender, RoutedEventArgs e)
+    {
+        _cloudinaryConfig.IsApiKeyVisible = !_cloudinaryConfig.IsApiKeyVisible;
+
+        if (_cloudinaryConfig.IsApiKeyVisible)
+        {
+            // Show TextBox, hide PasswordBox
+            CloudinaryApiKeyTextBox.Text = CloudinaryApiKeyPasswordBox.Password;
+            CloudinaryApiKeyTextBox.Visibility = Visibility.Visible;
+            CloudinaryApiKeyPasswordBox.Visibility = Visibility.Collapsed;
+            CloudinaryApiKeyToggleButton.Content = "🙈";
+        }
+        else
+        {
+            // Show PasswordBox, hide TextBox
+            CloudinaryApiKeyPasswordBox.Password = CloudinaryApiKeyTextBox.Text;
+            CloudinaryApiKeyPasswordBox.Visibility = Visibility.Visible;
+            CloudinaryApiKeyTextBox.Visibility = Visibility.Collapsed;
+            CloudinaryApiKeyToggleButton.Content = "👁️";
+        }
+    }
+
+    /// <summary>
+    /// Toggle Cloudinary API Secret visibility button click handler.
+    /// </summary>
+    private void ToggleCloudinaryApiSecretVisibility_Click(object sender, RoutedEventArgs e)
+    {
+        _cloudinaryConfig.IsApiSecretVisible = !_cloudinaryConfig.IsApiSecretVisible;
+
+        if (_cloudinaryConfig.IsApiSecretVisible)
+        {
+            // Show TextBox, hide PasswordBox
+            CloudinaryApiSecretTextBox.Text = CloudinaryApiSecretPasswordBox.Password;
+            CloudinaryApiSecretTextBox.Visibility = Visibility.Visible;
+            CloudinaryApiSecretPasswordBox.Visibility = Visibility.Collapsed;
+            CloudinaryApiSecretToggleButton.Content = "🙈";
+        }
+        else
+        {
+            // Show PasswordBox, hide TextBox
+            CloudinaryApiSecretPasswordBox.Password = CloudinaryApiSecretTextBox.Text;
+            CloudinaryApiSecretPasswordBox.Visibility = Visibility.Visible;
+            CloudinaryApiSecretTextBox.Visibility = Visibility.Collapsed;
+            CloudinaryApiSecretToggleButton.Content = "👁️";
+        }
     }
 
     #endregion
@@ -1337,6 +1558,95 @@ public class ApiKeyViewModel : INotifyPropertyChanged
     public string VisibilityIcon => IsPasswordVisible ? "🙈" : "👁️";
 
     public bool IsExistingEntry { get; set; }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}
+
+/// <summary>
+/// View model for Cloudinary configuration display in UI
+/// </summary>
+public class CloudinaryConfigViewModel : INotifyPropertyChanged
+{
+    private string _cloudName = string.Empty;
+    private string _apiKey = string.Empty;
+    private string _apiSecret = string.Empty;
+    private bool _isApiKeyVisible = false;
+    private bool _isApiSecretVisible = false;
+
+    public string CloudName
+    {
+        get => _cloudName;
+        set
+        {
+            if (_cloudName != value)
+            {
+                _cloudName = value;
+                OnPropertyChanged(nameof(CloudName));
+            }
+        }
+    }
+
+    public string ApiKey
+    {
+        get => _apiKey;
+        set
+        {
+            if (_apiKey != value)
+            {
+                _apiKey = value;
+                OnPropertyChanged(nameof(ApiKey));
+            }
+        }
+    }
+
+    public string ApiSecret
+    {
+        get => _apiSecret;
+        set
+        {
+            if (_apiSecret != value)
+            {
+                _apiSecret = value;
+                OnPropertyChanged(nameof(ApiSecret));
+            }
+        }
+    }
+
+    public bool IsApiKeyVisible
+    {
+        get => _isApiKeyVisible;
+        set
+        {
+            if (_isApiKeyVisible != value)
+            {
+                _isApiKeyVisible = value;
+                OnPropertyChanged(nameof(IsApiKeyVisible));
+                OnPropertyChanged(nameof(ApiKeyVisibilityIcon));
+            }
+        }
+    }
+
+    public bool IsApiSecretVisible
+    {
+        get => _isApiSecretVisible;
+        set
+        {
+            if (_isApiSecretVisible != value)
+            {
+                _isApiSecretVisible = value;
+                OnPropertyChanged(nameof(IsApiSecretVisible));
+                OnPropertyChanged(nameof(ApiSecretVisibilityIcon));
+            }
+        }
+    }
+
+    public string ApiKeyVisibilityIcon => IsApiKeyVisible ? "🙈" : "👁️";
+    public string ApiSecretVisibilityIcon => IsApiSecretVisible ? "🙈" : "👁️";
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

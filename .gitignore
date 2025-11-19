@@ -110,3 +110,29 @@ $RECYCLE.BIN/
 logs/
 *.log
 
+# Test files and experiments (not needed by end users)
+testfiles/
+TestFiles/
+
+# Local notes and TODO files (not for public repo)
+claudi and fal.txt
+DissABish() TODO.txt
+fal-ai.kling-video.lipsync.audio-to-video.txt
+fal-ai.sync-lipsync.txt
+fal.AI.Client Library.txt
+fal.ai.models.creatify.lipsync.txt
+fal.ai.other lip sync models to try.txt
+fal.ai.pixverse.lipsync.txt
+fal.ai.storage.txt
+fal.AI.TODO.txt
+fal.AI.Use a Custom Container Image.txt
+fal.ai.VEED Lip Sync.txt
+HailuoAI.TODO.txt
+ignorethoughts.txt
+Lip Sync Cascade issue.txt
+MVSEP Ai todo.txt
+MVSEP API Vocals.txt
+RightClicks - starting doc.txt
+RightClicks - starting doc2.txt
+WisperTODO.txt
+

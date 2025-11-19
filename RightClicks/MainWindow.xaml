@@ -524,6 +524,190 @@
                                 Margin="0,0,0,20"
                                 Click="SaveApiConfigButton_Click"/>
 
+                        <!-- Cloudinary Configuration Section -->
+                        <TextBlock Text="Cloudinary Configuration"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource TextBrush}"
+                                   Margin="0,20,0,10"/>
+
+                        <TextBlock TextWrapping="Wrap"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Margin="0,0,0,20">
+                            <Run Text="Cloudinary is used for temporary file hosting during AI processing (lip sync features)."/>
+                            <LineBreak/>
+                            <Run Text="Files are automatically deleted after processing completes."/>
+                        </TextBlock>
+
+                        <Border Background="{StaticResource CardBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="15"
+                                Margin="0,0,0,20">
+                            <StackPanel>
+                                <!-- Cloud Name -->
+                                <TextBlock Text="Cloud Name:"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}"
+                                           Margin="0,0,0,5"/>
+                                <TextBox x:Name="CloudinaryCloudNameTextBox"
+                                         Padding="8"
+                                         Margin="0,0,0,15"
+                                         TextChanged="CloudinaryCloudNameTextBox_TextChanged"/>
+
+                                <!-- API Key -->
+                                <TextBlock Text="API Key:"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}"
+                                           Margin="0,0,0,5"/>
+                                <Grid Margin="0,0,0,15">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Masked PasswordBox -->
+                                    <PasswordBox Grid.Column="0"
+                                                 x:Name="CloudinaryApiKeyPasswordBox"
+                                                 Padding="8"
+                                                 PasswordChar="●"
+                                                 PasswordChanged="CloudinaryApiKeyPasswordBox_PasswordChanged">
+                                        <PasswordBox.Style>
+                                            <Style TargetType="PasswordBox">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </Style>
+                                        </PasswordBox.Style>
+                                    </PasswordBox>
+
+                                    <!-- Unmasked TextBox -->
+                                    <TextBox Grid.Column="0"
+                                             x:Name="CloudinaryApiKeyTextBox"
+                                             Padding="8"
+                                             FontFamily="Consolas"
+                                             TextChanged="CloudinaryApiKeyTextBox_TextChanged"
+                                             Visibility="Collapsed"/>
+
+                                    <!-- Toggle Button -->
+                                    <Button Grid.Column="1"
+                                            x:Name="CloudinaryApiKeyToggleButton"
+                                            Content="👁️"
+                                            Padding="8"
+                                            Margin="4,0,0,0"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Cursor="Hand"
+                                            ToolTip="Toggle visibility"
+                                            Click="ToggleCloudinaryApiKeyVisibility_Click">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="BorderThickness" Value="0"/>
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#F0F0F0"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </Grid>
+
+                                <!-- API Secret -->
+                                <TextBlock Text="API Secret:"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}"
+                                           Margin="0,0,0,5"/>
+                                <Grid Margin="0,0,0,15">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Masked PasswordBox -->
+                                    <PasswordBox Grid.Column="0"
+                                                 x:Name="CloudinaryApiSecretPasswordBox"
+                                                 Padding="8"
+                                                 PasswordChar="●"
+                                                 PasswordChanged="CloudinaryApiSecretPasswordBox_PasswordChanged">
+                                        <PasswordBox.Style>
+                                            <Style TargetType="PasswordBox">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </Style>
+                                        </PasswordBox.Style>
+                                    </PasswordBox>
+
+                                    <!-- Unmasked TextBox -->
+                                    <TextBox Grid.Column="0"
+                                             x:Name="CloudinaryApiSecretTextBox"
+                                             Padding="8"
+                                             FontFamily="Consolas"
+                                             TextChanged="CloudinaryApiSecretTextBox_TextChanged"
+                                             Visibility="Collapsed"/>
+
+                                    <!-- Toggle Button -->
+                                    <Button Grid.Column="1"
+                                            x:Name="CloudinaryApiSecretToggleButton"
+                                            Content="👁️"
+                                            Padding="8"
+                                            Margin="4,0,0,0"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Cursor="Hand"
+                                            ToolTip="Toggle visibility"
+                                            Click="ToggleCloudinaryApiSecretVisibility_Click">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="BorderThickness" Value="0"/>
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#F0F0F0"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </Grid>
+
+                                <!-- Save Button -->
+                                <Button Content="Save Cloudinary Configuration"
+                                        Width="250"
+                                        HorizontalAlignment="Left"
+                                        Click="SaveCloudinaryConfigButton_Click"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Cloudinary Help Text -->
+                        <Border Background="#E6F3FF"
+                                BorderBrush="#B3D9FF"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="15"
+                                Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock Text="ℹ️ About Cloudinary"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}"
+                                           Margin="0,0,0,8"/>
+                                <TextBlock TextWrapping="Wrap"
+                                           Foreground="{StaticResource SecondaryTextBrush}"
+                                           LineHeight="20">
+                                    <Run Text="Cloudinary is used for temporary file hosting during AI lip sync processing."/>
+                                    <LineBreak/>
+                                    <Run Text="• Files are automatically uploaded before processing"/>
+                                    <LineBreak/>
+                                    <Run Text="• Files are automatically deleted after processing (success or failure)"/>
+                                    <LineBreak/>
+                                    <Run Text="• Free tier: 25 GB storage, 25 GB bandwidth/month"/>
+                                    <LineBreak/><LineBreak/>
+                                    <Run Text="📖 See cloudinary.md for complete setup instructions."/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
                         <!-- Help Text -->
                         <Border Background="#FFF9E6"
                                 BorderBrush="#FFE0B3"

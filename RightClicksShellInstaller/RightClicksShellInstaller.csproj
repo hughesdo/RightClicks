@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>RightClicksShellManager</AssemblyName>
+    <RootNamespace>RightClicksShellInstaller</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <!-- Post-build: Copy shell extension DLL to installer output directory -->
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Message Text="Copying RightClicksShellExtension.dll to installer output directory..." Importance="high" />
+
+    <Copy SourceFiles="$(SolutionDir)RightClicksShellExtension\bin\Debug\RightClicksShellExtension.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="$(SolutionDir)RightClicksShellExtension\SharpShell.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="$(SolutionDir)RightClicksShellExtension\Newtonsoft.Json.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+
+    <Message Text="Shell extension DLL copied to $(OutDir)" Importance="high" />
+  </Target>
+
+</Project>
+

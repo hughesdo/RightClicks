@@ -133,22 +133,47 @@ public static class ConfigurationService
 
     /// <summary>
     /// Create default configuration with all features enabled.
+    /// Uses FeatureDiscoveryService to automatically populate feature metadata.
+    ///
+    /// DEVELOPMENT PHILOSOPHY: "Everything On by Default"
+    /// - All features are enabled to validate nothing breaks
+    /// - All API keys are configured to catch missing environment variables early
+    /// - All cloud services are configured to ensure full stack testing
+    /// - End users can disable features later via UI
     /// </summary>
     private static AppConfig CreateDefaultConfig()
     {
+        Log.Information("Creating default configuration with discovered features...");
+
+        // Discover all features
+        var discoveredFeatures = FeatureDiscoveryService.DiscoverFeatures();
+
+        // Create FeatureConfig entries from discovered features
+        var featureConfigs = discoveredFeatures.Select(f => new FeatureConfig
+        {
+            Id = f.Id,
+            DisplayName = f.DisplayName,
+            Description = f.Description,
+            SupportedExtensions = f.SupportedExtensions,
+            Enabled = true // All features enabled by default for development/testing
+        }).ToList();
+
+        Log.Information("Created default config with {Count} features (all enabled)", featureConfigs.Count);
+
         return new AppConfig
         {
             Version = "1.0.0",
-            Features = new List<FeatureConfig>
-            {
-                new() { Id = "ExtractMp3", Enabled = true },
-                new() { Id = "ExtractWav", Enabled = true },
-                new() { Id = "LastFrameToJpg", Enabled = true },
-                new() { Id = "FirstFrameToJpg", Enabled = true }
-            },
+            Features = featureConfigs,
             ApiKeys = new Dictionary<string, string>
             {
-                { "openAI", "OPENAI_API_KEY" }
+                { "openAI", "OPENAI_API_KEY" },
+                { "fal.ai", "FAL_KEY" }
+            },
+            Cloudinary = new CloudinaryConfig
+            {
+                CloudName = "do15ttvsq",
+                ApiKeyEnvVar = "CLOUDINARY_API_KEY",
+                ApiSecretEnvVar = "CLOUDINARY_API_SECRET"
             },
             Settings = new AppSettings
             {

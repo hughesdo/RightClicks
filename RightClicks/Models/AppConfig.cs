@@ -24,6 +24,11 @@ public class AppConfig
     public Dictionary<string, string> ApiKeys { get; set; } = new();
 
     /// <summary>
+    /// Cloudinary configuration for file hosting.
+    /// </summary>
+    public CloudinaryConfig Cloudinary { get; set; } = new();
+
+    /// <summary>
     /// Application settings.
     /// </summary>
     public AppSettings Settings { get; set; } = new();
@@ -69,5 +74,28 @@ public class AppSettings
     /// Supports environment variables like %USERPROFILE%.
     /// </summary>
     public string? OutputPath { get; set; }
+}
+
+/// <summary>
+/// Cloudinary configuration for file hosting.
+/// </summary>
+public class CloudinaryConfig
+{
+    /// <summary>
+    /// Cloudinary cloud name (e.g., "do15ttvsq").
+    /// </summary>
+    public string CloudName { get; set; } = "do15ttvsq";
+
+    /// <summary>
+    /// Environment variable name for Cloudinary API key.
+    /// Default: "CLOUDINARY_API_KEY"
+    /// </summary>
+    public string ApiKeyEnvVar { get; set; } = "CLOUDINARY_API_KEY";
+
+    /// <summary>
+    /// Environment variable name for Cloudinary API secret.
+    /// Default: "CLOUDINARY_API_SECRET"
+    /// </summary>
+    public string ApiSecretEnvVar { get; set; } = "CLOUDINARY_API_SECRET";
 }
 

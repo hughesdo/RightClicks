@@ -22,6 +22,8 @@ namespace RightClicks.Features.Audio
 
         public string[] SupportedExtensions => new[] { ".wav" };
 
+        public bool IsCloudBased => false;
+
         public async Task<FeatureResult> ExecuteAsync(string filePath, CancellationToken cancellationToken)
         {
             var startTime = DateTime.Now;

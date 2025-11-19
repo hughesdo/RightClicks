@@ -29,6 +29,12 @@ public interface IFileFeature
     string[] SupportedExtensions { get; }
 
     /// <summary>
+    /// Indicates whether this feature uses cloud-based API services.
+    /// Cloud-based features are marked with a ☁️ icon in the UI.
+    /// </summary>
+    bool IsCloudBased { get; }
+
+    /// <summary>
     /// Execute the feature on the specified file.
     /// </summary>
     /// <param name="filePath">Full path to the file to process.</param>

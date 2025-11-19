@@ -2,6 +2,8 @@
 
 **Context-aware Windows automation through intelligent right-click menus**
 
+**Quick Demo:** https://www.youtube.com/watch?v=MAjGchRpTNw — Here's a quick demo of it in use so far.
+
 ---
 
 ## What is RightClicks?
@@ -27,13 +29,80 @@ Small shortcuts compound into massive time savings:
 **🚧 Active Development** — Core functionality working, expanding feature set.
 
 RightClicks currently includes:
-- ✅ **12 working features** (video, audio, image, text operations)
+- ✅ **17 working features** (video, audio, image, text operations)
 - ✅ **Windows Explorer integration** (right-click context menu)
 - ✅ **Background job queue** with configurable concurrency
 - ✅ **System tray application** with configuration UI
 - ✅ **Windows notifications** for job completion
+- ✅ **API-based features** (fal.ai integration with 5 lip sync models)
 
 See **[TASKS.md](TASKS.md)** for detailed development progress and roadmap.
+
+---
+
+## API-Based Features
+
+RightClicks now supports **cloud-based AI features** that leverage external APIs for advanced operations. These features are marked with a ☁️ icon in the UI.
+
+### Currently Supported APIs
+
+**fal.ai** — AI-powered video and image processing
+- ✅ **Lip Sync (5 models)** — Sync video with audio using AI
+  - Pixverse ($0.20/min) — Fast, good quality
+  - VEED ($0.40/min) — High quality, slower
+  - Kling ($0.40/min) — High quality alternative
+  - Creatify ($0.40/min) — High quality alternative
+  - Sync ($0.40/min) — High quality alternative
+
+### Setup Instructions
+
+1. **Open RightClicks** from the system tray
+2. **Navigate to API Config tab**
+3. **Add API service:**
+   - Service Name: `fal.ai`
+   - Environment Variable: `FAL_KEY`
+4. **Enter your API key** (get one from [fal.ai](https://fal.ai))
+5. **Click Save**
+
+API-based features (marked with ☁️) will now appear in context menus when you right-click supported files.
+
+### Important Notes
+
+- **Internet connectivity required** — API features require an active internet connection
+- **Usage costs** — Most AI APIs charge per request. Check your provider's pricing
+- **Processing time** — Cloud-based operations may take several minutes depending on file size and API queue
+- **Security** — API keys are stored securely in Windows User environment variables, never in config files
+
+### File Hosting for API Features
+
+**fal.ai Lip Sync** and other cloud-based features require temporary file hosting to send files to external APIs.
+
+**RightClicks uses Cloudinary** (enterprise-grade cloud storage) as the primary file hosting service. See **[cloudinary.md](cloudinary.md)** for detailed setup instructions.
+
+**Why Cloudinary?**
+- ✅ Enterprise-grade reliability (unlike 0x0.st which has server-side bugs)
+- ✅ Generous free tier (25 GB storage, 25 GB bandwidth/month)
+- ✅ Fast global CDN
+- ✅ Works perfectly with fal.ai and other external APIs
+
+**Setup Required:**
+1. Create a free Cloudinary account
+2. Configure API keys in RightClicks settings
+3. Create an unsigned upload preset named "RightClicks"
+
+See **[cloudinary.md](cloudinary.md)** for complete setup instructions.
+
+**Current Limits:**
+- **Maximum file size:** 100 MB per file (Cloudinary free tier)
+- **File retention:** Files are automatically deleted after processing completes
+- **Recommended video length:** Up to 30 seconds for lip sync features
+- **Audio format:** Always uses MP3 (automatically extracted if needed)
+
+**Privacy & Security:**
+- ✅ API keys stored securely in Windows environment variables
+- ✅ Unsigned uploads (no API secrets exposed)
+- ✅ Files automatically deleted after processing (success or failure)
+- ⚠️ Uploaded files are temporarily publicly accessible via their URLs (but URLs are unguessable)
 
 ---
 
@@ -91,6 +160,7 @@ The foundation is solid. The architecture is extensible. The vision is ambitious
 - **[TASKS.md](TASKS.md)** — Development roadmap and current progress
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** — Technical decisions and implementation details
 - **[RightClicks.md](RightClicks.md)** — Feature specifications and exact behaviors
+- **[cloudinary.md](cloudinary.md)** — Cloudinary setup and configuration for API-based features
 
 ---
 

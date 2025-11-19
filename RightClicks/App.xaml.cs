@@ -494,7 +494,7 @@ public partial class App : System.Windows.Application
     }
 
     /// <summary>
-    /// Show a balloon notification from the system tray icon.
+    /// Show a balloon notification from the system tray icon with sound.
     /// </summary>
     private void ShowNotification(string title, string message, ToolTipIcon icon)
     {
@@ -506,6 +506,25 @@ public partial class App : System.Windows.Application
                 tipText: message,
                 tipIcon: icon
             );
+
+            // Play system sound based on notification type
+            try
+            {
+                if (icon == ToolTipIcon.Info)
+                {
+                    // Success sound
+                    System.Media.SystemSounds.Asterisk.Play();
+                }
+                else if (icon == ToolTipIcon.Error)
+                {
+                    // Error sound
+                    System.Media.SystemSounds.Hand.Play();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to play notification sound");
+            }
 
             Log.Debug("Notification shown: {Title} - {Message}", title, message);
         }

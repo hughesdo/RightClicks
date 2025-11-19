@@ -2,7 +2,7 @@
 
 **Last Updated:** 2025-11-19
 
-**Current Phase:** Phase 5 - Additional Features (17 features complete!)
+**Current Phase:** Phase 5 - Additional Features (24 features complete!)
 
 ---
 
@@ -233,10 +233,33 @@
   - [x] 5 lip sync models implemented (Pixverse, VEED, Kling, Creatify, Sync)
   - [x] Automatic MP3 extraction from video files
   - [x] Cloudinary integration for file hosting (required by fal.ai)
-  - [x] Pricing displayed in menu names ($0.20/min vs $0.40/min)
+  - [x] Pricing displayed in menu names ($0.17/min to $1.00/min)
   - [x] Comprehensive error handling and logging
 
-### ✅ Completed Features (17 total)
+### ✅ Local AI Features Integration (COMPLETE!)
+
+- [x] **Whisper.net Transcription Integration**
+  - [x] WhisperService.cs - Model management and processor creation
+  - [x] WhisperTranscribeFeatureBase.cs - Base class for all transcription features
+  - [x] 6 Whisper models implemented (Tiny, Base, Small, Medium, Large, Turbo)
+  - [x] Automatic model download on first use (from Hugging Face)
+  - [x] GPU acceleration (automatic CUDA support, silent CPU fallback)
+  - [x] Audio format conversion (all formats → WAV 16kHz PCM required by Whisper.net)
+  - [x] Supports all audio/video formats (MP3, WAV, MP4, AVI, MKV, etc.)
+  - [x] Output: Plain text file (.txt) next to source file
+  - [x] VRAM requirements displayed in menu names (~1 GB to ~10 GB)
+  - [x] Comprehensive error handling and logging
+  - [x] Complete documentation in WHISPER_TRANSCRIPTION.md
+
+### ✅ Notification System Enhancements (COMPLETE!)
+
+- [x] **Sound Notifications**
+  - [x] Success sound (System.Media.SystemSounds.Asterisk) - Pleasant "ding"
+  - [x] Error sound (System.Media.SystemSounds.Hand) - Alert "bonk"
+  - [x] Graceful fallback if sound playback fails
+  - [x] Works for all queued jobs (context menu and CLI with --queue flag)
+
+### ✅ Completed Features (24 total)
 
 #### Video Features (11 features)
 - [x] ExtractMp3Feature - Extract MP3 audio from video
@@ -246,14 +269,20 @@
 - [x] ReverseVideoFeature - Reverse video playback
 - [x] Forward2ReverseFeature - Concatenate original + reversed
 - [x] WebmToMp4Feature - Convert WebM to MP4
-- [x] FalAiPixverseLipSyncFeature - AI lip sync ($0.20/min) ☁️
+- [x] FalAiPixverseLipSyncFeature - AI lip sync ($0.17/min) ☁️
 - [x] FalAiVeedLipSyncFeature - AI lip sync ($0.40/min) ☁️
-- [x] FalAiKlingLipSyncFeature - AI lip sync ($0.40/min) ☁️
-- [x] FalAiCreatifyLipSyncFeature - AI lip sync ($0.40/min) ☁️
-- [x] FalAiSyncLipSyncFeature - AI lip sync ($0.40/min) ☁️
+- [x] FalAiKlingLipSyncFeature - AI lip sync ($0.17/min) ☁️
+- [x] FalAiCreatifyLipSyncFeature - AI lip sync ($1.00/min) ☁️
+- [x] FalAiSyncLipSyncFeature - AI lip sync ($0.70/min) ☁️
 
-#### Audio Features (1 feature)
+#### Audio Features (7 features)
 - [x] WavToMp3Feature - Convert WAV to MP3
+- [x] WhisperTinyTranscribeFeature - Local AI transcription (fastest, ~1 GB VRAM) 🖥️
+- [x] WhisperBaseTranscribeFeature - Local AI transcription (fast, ~1 GB VRAM) 🖥️
+- [x] WhisperSmallTranscribeFeature - Local AI transcription (balanced, ~2 GB VRAM) 🖥️
+- [x] WhisperMediumTranscribeFeature - Local AI transcription (accurate, ~5 GB VRAM) 🖥️
+- [x] WhisperLargeTranscribeFeature - Local AI transcription (best quality, ~10 GB VRAM) 🖥️
+- [x] WhisperTurboTranscribeFeature - Local AI transcription (fast + accurate, ~6 GB VRAM) 🖥️
 
 #### Image Features (3 features)
 - [x] JpgToPngFeature - Convert JPG to PNG

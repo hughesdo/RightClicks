@@ -29,30 +29,52 @@ Small shortcuts compound into massive time savings:
 **🚧 Active Development** — Core functionality working, expanding feature set.
 
 RightClicks currently includes:
-- ✅ **17 working features** (video, audio, image, text operations)
+- ✅ **24 working features** (video, audio, image, text operations)
 - ✅ **Windows Explorer integration** (right-click context menu)
 - ✅ **Background job queue** with configurable concurrency
 - ✅ **System tray application** with configuration UI
-- ✅ **Windows notifications** for job completion
-- ✅ **API-based features** (fal.ai integration with 5 lip sync models)
+- ✅ **Windows notifications with sound** for job completion
+- ✅ **Cloud-based AI features** (fal.ai integration with 5 lip sync models)
+- ✅ **Local AI transcription** (Whisper.net with 6 models, GPU-accelerated)
 
 See **[TASKS.md](TASKS.md)** for detailed development progress and roadmap.
 
 ---
 
-## API-Based Features
+## Features
 
-RightClicks now supports **cloud-based AI features** that leverage external APIs for advanced operations. These features are marked with a ☁️ icon in the UI.
+### Local AI Features (No Internet Required)
+
+**Whisper Transcription** — Local AI-powered audio/video transcription using OpenAI's Whisper model
+- ✅ **6 models available** — Choose speed vs. accuracy tradeoff
+  - Tiny (~1 GB VRAM) — Fastest, basic accuracy
+  - Base (~1 GB VRAM) — Fast, good accuracy
+  - Small (~2 GB VRAM) — Balanced speed and accuracy
+  - Medium (~5 GB VRAM) — High accuracy, slower
+  - Large (~10 GB VRAM) — Best accuracy, slowest
+  - Turbo (~6 GB VRAM) — Fast with near-large accuracy
+- ✅ **GPU acceleration** — Automatic CUDA support (falls back to CPU)
+- ✅ **Automatic model download** — Models downloaded on first use (~75 MB - 3 GB)
+- ✅ **Supports all audio/video formats** — MP3, WAV, MP4, AVI, MKV, etc.
+- ✅ **Output:** Plain text file (`.txt`) next to source file
+
+**How to use:** Right-click any audio/video file → **Transcribe ▶** → Select model
+
+---
+
+## Cloud-Based AI Features
+
+RightClicks supports **cloud-based AI features** that leverage external APIs for advanced operations. These features are marked with a ☁️ icon in the UI.
 
 ### Currently Supported APIs
 
 **fal.ai** — AI-powered video and image processing
 - ✅ **Lip Sync (5 models)** — Sync video with audio using AI
-  - Pixverse ($0.20/min) — Fast, good quality
-  - VEED ($0.40/min) — High quality, slower
-  - Kling ($0.40/min) — High quality alternative
-  - Creatify ($0.40/min) — High quality alternative
-  - Sync ($0.40/min) — High quality alternative
+  - Kling ($0.17/min) — Most affordable
+  - Pixverse ($0.20/min) — Budget option
+  - VEED ($0.40/min) — Standard quality
+  - Sync v1.9 ($0.70/min) — High quality
+  - Creatify ($1.00/min) — Premium quality
 
 ### Setup Instructions
 

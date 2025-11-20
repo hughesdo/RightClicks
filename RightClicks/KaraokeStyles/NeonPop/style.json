@@ -1,0 +1,23 @@
+{
+  "styleName": "NeonPop",
+  "description": "Vibrant neon style with bold colors",
+  "fontName": "Impact",
+  "fontSize": 92,
+  "defaultPrimaryColor": "&H00FF00FF",
+  "defaultOutlineColor": "&H00000000",
+  "defaultOutlineThickness": 4,
+  "highlightPrimaryColor": "&H0000FFFF",
+  "highlightOutlineColor": "&H00FF00FF",
+  "highlightOutlineThickness": 7,
+  "karaokeAnimation": "pulse",
+  "highlightFadeTime": 0.35,
+  "positioning": "Bottom",
+  "marginV": 35,
+  "marginL": 10,
+  "marginR": 10,
+  "alignment": 2,
+  "playResX": 1920,
+  "playResY": 1080,
+  "whisperModel": "tiny.en"
+}
+

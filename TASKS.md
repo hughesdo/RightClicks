@@ -2,7 +2,7 @@
 
 **Last Updated:** 2025-11-19
 
-**Current Phase:** Phase 5 - Additional Features (24 features complete!)
+**Current Phase:** Phase 5 - Additional Features (33 features complete!)
 
 ---
 
@@ -259,9 +259,33 @@
   - [x] Graceful fallback if sound playback fails
   - [x] Works for all queued jobs (context menu and CLI with --queue flag)
 
-### ✅ Completed Features (24 total)
+### ✅ Karaoke Subtitle Rendering (COMPLETE!)
 
-#### Video Features (11 features)
+- [x] **Karaoke Subtitle Rendering System**
+  - [x] KaraokeService.cs - Core service for subtitle generation and video rendering
+  - [x] KaraokeFeatureBase.cs - Base class for all karaoke features
+  - [x] 3 visual styles (Classic, Modern Glow, Neon Pop)
+  - [x] 3 quality tiers (Tiny, Medium, High) using Whisper.net models
+  - [x] Word-level timing estimation from Whisper segment data
+  - [x] Two-layer ASS subtitle generation (static text + word-by-word highlighting)
+  - [x] FFmpeg subtitle burning with libass filter
+  - [x] JSON-based style configuration system
+  - [x] Timestamp normalization (fixes offset issues)
+  - [x] Complete documentation in KARAOKE_SUBTITLES.md
+  - [x] 9 karaoke features implemented:
+    - [x] KaraokeClassicTinyFeature - Classic style + Whisper Tiny
+    - [x] KaraokeClassicMediumFeature - Classic style + Whisper Small
+    - [x] KaraokeClassicHighFeature - Classic style + Whisper Large V3 Turbo
+    - [x] KaraokeModernGlowTinyFeature - Modern Glow style + Whisper Tiny
+    - [x] KaraokeModernGlowMediumFeature - Modern Glow style + Whisper Small
+    - [x] KaraokeModernGlowHighFeature - Modern Glow style + Whisper Large V3 Turbo
+    - [x] KaraokeNeonPopTinyFeature - Neon Pop style + Whisper Tiny
+    - [x] KaraokeNeonPopMediumFeature - Neon Pop style + Whisper Small
+    - [x] KaraokeNeonPopHighFeature - Neon Pop style + Whisper Large V3 Turbo
+
+### ✅ Completed Features (33 total)
+
+#### Video Features (20 features)
 - [x] ExtractMp3Feature - Extract MP3 audio from video
 - [x] ExtractWavFeature - Extract WAV audio from video
 - [x] FirstFrameToJpgFeature - Capture first frame as JPG
@@ -274,6 +298,15 @@
 - [x] FalAiKlingLipSyncFeature - AI lip sync ($0.17/min) ☁️
 - [x] FalAiCreatifyLipSyncFeature - AI lip sync ($1.00/min) ☁️
 - [x] FalAiSyncLipSyncFeature - AI lip sync ($0.70/min) ☁️
+- [x] KaraokeClassicTinyFeature - Karaoke subtitles (Classic style, Whisper Tiny) 🎤
+- [x] KaraokeClassicMediumFeature - Karaoke subtitles (Classic style, Whisper Small) 🎤
+- [x] KaraokeClassicHighFeature - Karaoke subtitles (Classic style, Whisper Large V3 Turbo) 🎤
+- [x] KaraokeModernGlowTinyFeature - Karaoke subtitles (Modern Glow style, Whisper Tiny) 🎤
+- [x] KaraokeModernGlowMediumFeature - Karaoke subtitles (Modern Glow style, Whisper Small) 🎤
+- [x] KaraokeModernGlowHighFeature - Karaoke subtitles (Modern Glow style, Whisper Large V3 Turbo) 🎤
+- [x] KaraokeNeonPopTinyFeature - Karaoke subtitles (Neon Pop style, Whisper Tiny) 🎤
+- [x] KaraokeNeonPopMediumFeature - Karaoke subtitles (Neon Pop style, Whisper Small) 🎤
+- [x] KaraokeNeonPopHighFeature - Karaoke subtitles (Neon Pop style, Whisper Large V3 Turbo) 🎤
 
 #### Audio Features (7 features)
 - [x] WavToMp3Feature - Convert WAV to MP3

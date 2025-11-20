@@ -29,13 +29,14 @@ Small shortcuts compound into massive time savings:
 **🚧 Active Development** — Core functionality working, expanding feature set.
 
 RightClicks currently includes:
-- ✅ **24 working features** (video, audio, image, text operations)
+- ✅ **33 working features** (video, audio, image, text operations)
 - ✅ **Windows Explorer integration** (right-click context menu)
 - ✅ **Background job queue** with configurable concurrency
 - ✅ **System tray application** with configuration UI
 - ✅ **Windows notifications with sound** for job completion
 - ✅ **Cloud-based AI features** (fal.ai integration with 5 lip sync models)
 - ✅ **Local AI transcription** (Whisper.net with 6 models, GPU-accelerated)
+- ✅ **Karaoke subtitle rendering** (9 features: 3 styles × 3 quality tiers)
 
 See **[TASKS.md](TASKS.md)** for detailed development progress and roadmap.
 
@@ -59,6 +60,20 @@ See **[TASKS.md](TASKS.md)** for detailed development progress and roadmap.
 - ✅ **Output:** Plain text file (`.txt`) next to source file
 
 **How to use:** Right-click any audio/video file → **Transcribe ▶** → Select model
+
+---
+
+**Karaoke Subtitle Rendering** — Transform videos into karaoke-style subtitled content with word-by-word highlighting
+- ✅ **3 visual styles** — Classic (traditional), Modern Glow (professional), Neon Pop (social media)
+- ✅ **3 quality tiers** — Tiny (fastest), Medium (balanced), High (best quality)
+- ✅ **Word-level timing** — Each word highlights individually as it's spoken
+- ✅ **Burned-in subtitles** — Works on any video player, no external subtitle file needed
+- ✅ **ASS subtitle export** — Separate `.ass` file for advanced editing
+- ✅ **Fully customizable** — Edit styles, fonts, colors, positioning via JSON config
+
+**How to use:** Right-click any video file → **Karaoke ▶** → Select style → Select quality tier
+
+**📖 Full documentation:** See **[KARAOKE_SUBTITLES.md](KARAOKE_SUBTITLES.md)** for detailed style descriptions, customization guide, and troubleshooting
 
 ---
 

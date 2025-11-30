@@ -80,36 +80,47 @@ See **[TASKS.md](TASKS.md)** for detailed development progress and roadmap.
 
 **How to use:** Right-click any audio file → **RVC ▶** → Select voice model
 
-**Requirements:** Python 3.10 virtual environment with RVC dependencies (included in installation)
+### RVC Setup (Optional - Advanced Users)
 
-### RVC Voice Models - Download & Installation
+**Note:** RVC is **optional**. RightClicks works fine without it - you just won't have voice conversion features.
 
-**⚠️ Large Files Notice:** RVC voice models are ~53 MB each. Due to GitHub's file size recommendations, only **Beavis** and **Butthead** models are included in the repository as starter/demo voices.
+RVC requires a **~10 GB** setup that includes a Python virtual environment. This is **not included in the GitHub repository** due to size limitations.
 
-**To add more voice models:**
+**What IS included:**
+- ✅ Beavis and Butthead voice models (~53 MB each) as starter demos
+- ✅ RVC inference code and configuration
 
-1. **Download RVC models** from trusted sources:
-   - [weights.gg](https://weights.gg/) — Community voice model database
-   - [Hugging Face](https://huggingface.co/) — Search for "RVC" models
-   - [AI Hub Discord](https://discord.gg/aihub) — Active RVC community
+**What you need to set up locally:**
+- ❌ Python 3.10 virtual environment with dependencies (~8-9 GB)
+- ❌ Base AI models: `hubert_base.pt` (~181 MB) and `rmvpe.pt` (~173 MB)
 
-2. **Place models in the weights folder BEFORE running install.bat:**
+**To enable RVC features:**
+
+1. **Install Python 3.10** from [python.org](https://www.python.org/downloads/release/python-3100/)
+
+2. **Create the virtual environment:**
+   ```bash
+   cd RVC
+   python -m venv venv
+   venv\Scripts\activate
+   pip install -r requirements.txt
    ```
-   RightClicks\RVC\assets\weights\
-   ```
-   Each model should be a `.pth` file (e.g., `Trump.pth`, `Obama.pth`)
 
-3. **Run install.bat** — All models in the weights folder will be copied to the installation
+3. **Download base models** (install.bat will attempt this automatically, or do it manually):
+   - [hubert_base.pt](https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/hubert_base.pt) → place in `RVC/assets/hubert/`
+   - [rmvpe.pt](https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/rmvpe.pt) → place in `RVC/assets/rmvpe/`
 
-4. **Models are auto-discovered** — RightClicks automatically finds all `.pth` files and creates menu entries for each
+4. **Run install.bat** — It will detect and copy the RVC setup
 
-**Model naming convention:** The filename becomes the voice name in the menu. `MyVoice.pth` appears as "RVC MyVoice" in the context menu.
+**Adding more voice models:**
 
-**Post-installation:** You can also add models directly to:
-```
-%LOCALAPPDATA%\RightClicks\RVC\assets\weights\
-```
-New models will appear after restarting Windows Explorer or RightClicks.
+Download `.pth` voice models from:
+- [weights.gg](https://weights.gg/) — Community voice model database
+- [Hugging Face](https://huggingface.co/) — Search for "RVC" models
+
+Place them in `RVC\assets\weights\` before install, or `%LOCALAPPDATA%\RightClicks\RVC\assets\weights\` after install.
+
+**Models are auto-discovered** — The filename becomes the menu entry name (e.g., `Trump.pth` → "RVC Trump").
 
 ---
 
@@ -255,13 +266,11 @@ The foundation is solid. The architecture is extensible. The vision is ambitious
 
 ### For End Users
 
-**⚠️ Important:** RightClicks requires approximately **10 GB of disk space** due to the included RVC voice conversion models and Python environment.
-
 **Requirements:**
 - Windows 10/11 (64-bit)
-- .NET 8.0 Runtime (will be prompted to install if missing)
-- ~10 GB free disk space
+- .NET 8.0 SDK ([download here](https://dotnet.microsoft.com/download/dotnet/8.0))
 - Administrator privileges (for shell extension installation)
+- Disk space: **~50 MB** (core) or **~10 GB** (with RVC voice conversion)
 
 **Installation Steps:**
 
@@ -273,9 +282,10 @@ The foundation is solid. The architecture is extensible. The vision is ambitious
 
 2. **Run install.bat as Administrator:**
    - Right-click `install.bat` → "Run as administrator"
-   - The script will:
+   - The script will automatically:
+     - Build the project (if .NET SDK is installed)
      - Copy RightClicks application to `%LOCALAPPDATA%\RightClicks\`
-     - Copy RVC folder (~10 GB) including Python venv and voice models
+     - Set up RVC voice conversion (if configured - see below)
      - Install Windows Explorer shell extension
      - Restart Windows Explorer
 

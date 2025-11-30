@@ -7,15 +7,16 @@ REM and registers the Windows Explorer shell extension.
 REM
 REM REQUIREMENTS:
 REM - Must run as Administrator
-REM - Requires ~10 GB disk space
-REM - Requires .NET 8.0 Runtime
+REM - Requires .NET 8.0 SDK (to build) or prebuilt binaries
+REM - Disk space: ~50 MB (core) or ~10 GB (with RVC)
 REM
 REM WHAT IT DOES:
-REM 1. Copies RightClicks application files
-REM 2. Copies RVC inference engine (~10 GB)
-REM 3. Checks environment variables
-REM 4. Installs shell extension
-REM 5. Restarts Windows Explorer
+REM 1. Builds the project (if not already built)
+REM 2. Copies RightClicks application files
+REM 3. Copies RVC inference engine (if available)
+REM 4. Checks environment variables
+REM 5. Installs shell extension
+REM 6. Restarts Windows Explorer
 REM ========================================
 
 echo.
@@ -39,7 +40,14 @@ REM Set installation directory
 set INSTALL_DIR=%LOCALAPPDATA%\RightClicks
 echo Installing to: %INSTALL_DIR%
 echo.
-echo WARNING: This installation requires approximately 10 GB of disk space.
+
+REM Check disk space requirements
+if exist "RVC\venv" (
+    echo NOTE: RVC folder detected - full installation requires ~10 GB
+) else (
+    echo NOTE: Core installation requires ~50 MB
+    echo       RVC voice conversion is not set up - see README.md
+)
 echo.
 pause
 
@@ -58,50 +66,151 @@ if "%ERRORLEVEL%"=="0" (
 )
 
 REM ========================================
-REM Step 1: Copy RightClicks Application
+REM Step 1: Build and Copy RightClicks Application
 REM ========================================
 echo.
-echo [1/5] Copying RightClicks application...
+echo [1/5] Building and copying RightClicks application...
 
-if not exist "RightClicks\bin\Release\net8.0" (
-    echo ERROR: RightClicks application not found. Please build the project first:
-    echo   dotnet build --configuration Release
-    echo.
+REM Check if build is needed
+if not exist "RightClicks\bin\Release\net8.0-windows\RightClicks.exe" (
+    echo   Building project...
+
+    REM Check if dotnet is available
+    where dotnet >NUL 2>&1
+    if %errorLevel% neq 0 (
+        echo   ERROR: .NET SDK not found. Please install .NET 8.0 SDK from:
+        echo     https://dotnet.microsoft.com/download/dotnet/8.0
+        echo.
+        echo   Or build the project manually with Visual Studio.
+        pause
+        exit /b 1
+    )
+
+    dotnet build --configuration Release --verbosity minimal
+    if %errorLevel% neq 0 (
+        echo   ERROR: Build failed. Check the errors above.
+        pause
+        exit /b 1
+    )
+    echo   ✓ Build successful
+) else (
+    echo   Using existing build...
+)
+
+REM Verify build output exists
+if not exist "RightClicks\bin\Release\net8.0-windows\RightClicks.exe" (
+    echo   ERROR: Build output not found at RightClicks\bin\Release\net8.0-windows\
     pause
     exit /b 1
 )
 
-xcopy /Y /E /I /Q "RightClicks\bin\Release\net8.0\*" "%INSTALL_DIR%\" >NUL
+echo   Copying application files...
+xcopy /Y /E /I /Q "RightClicks\bin\Release\net8.0-windows\*" "%INSTALL_DIR%\" >NUL
 if %errorLevel% neq 0 (
-    echo ERROR: Failed to copy RightClicks application files
+    echo   ERROR: Failed to copy RightClicks application files
     pause
     exit /b 1
 )
+
+REM Copy RightClicksShellManager (builds to separate location - .NET Framework 4.8)
+if exist "RightClicksShellManager\bin\Release\RightClicksShellManager.exe" (
+    echo   Copying shell manager...
+    copy /Y "RightClicksShellManager\bin\Release\RightClicksShellManager.exe" "%INSTALL_DIR%\" >NUL
+    copy /Y "RightClicksShellManager\bin\Release\*.dll" "%INSTALL_DIR%\" >NUL 2>NUL
+) else (
+    echo   ⚠ RightClicksShellManager not found - shell extension may not install
+)
+
 echo   ✓ RightClicks application copied
 
 REM ========================================
 REM Step 2: Copy RVC Inference Engine
 REM ========================================
 echo.
-echo [2/5] Copying RVC inference engine...
-echo   This may take several minutes (copying ~10 GB)...
+echo [2/5] Setting up RVC inference engine...
 echo.
 
 REM Check if RVC folder exists
 if not exist "RVC" (
-    echo ERROR: RVC folder not found at: %CD%\RVC
-    echo   Please ensure the RVC folder is in the repository root.
-    pause
-    exit /b 1
+    echo   ⚠ RVC folder not found - skipping RVC setup
+    echo   RVC voice conversion features will not be available.
+    set RVC_INSTALLED=0
+    goto :skip_rvc
 )
+
+REM Check if RVC venv exists (required for RVC to work)
+if not exist "RVC\venv" (
+    echo   ⚠ RVC Python environment not found at: RVC\venv
+    echo.
+    echo   RVC requires a Python 3.10 virtual environment with dependencies.
+    echo   To set up RVC manually:
+    echo     1. Install Python 3.10
+    echo     2. cd RVC
+    echo     3. python -m venv venv
+    echo     4. venv\Scripts\activate
+    echo     5. pip install -r requirements.txt
+    echo.
+    echo   Skipping RVC installation - voice conversion features will not work.
+    set RVC_INSTALLED=0
+    goto :skip_rvc
+)
+
+REM Check for required RVC models
+set RVC_MODELS_MISSING=0
+if not exist "RVC\assets\hubert\hubert_base.pt" set RVC_MODELS_MISSING=1
+if not exist "RVC\assets\rmvpe\rmvpe.pt" set RVC_MODELS_MISSING=1
+
+if %RVC_MODELS_MISSING%==1 (
+    echo   Downloading required RVC models...
+    echo.
+
+    REM Try to download models using Python
+    if exist "RVC\venv\Scripts\python.exe" (
+        echo   Downloading hubert_base.pt ^(~181 MB^)...
+        "RVC\venv\Scripts\python.exe" -c "import requests; r=requests.get('https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/hubert_base.pt'); open('RVC/assets/hubert/hubert_base.pt','wb').write(r.content)" 2>NUL
+        if not exist "RVC\assets\hubert\hubert_base.pt" (
+            echo   ⚠ Failed to download hubert_base.pt
+        ) else (
+            echo   ✓ hubert_base.pt downloaded
+        )
+
+        echo   Downloading rmvpe.pt ^(~173 MB^)...
+        "RVC\venv\Scripts\python.exe" -c "import requests; r=requests.get('https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/rmvpe.pt'); open('RVC/assets/rmvpe/rmvpe.pt','wb').write(r.content)" 2>NUL
+        if not exist "RVC\assets\rmvpe\rmvpe.pt" (
+            echo   ⚠ Failed to download rmvpe.pt
+        ) else (
+            echo   ✓ rmvpe.pt downloaded
+        )
+    ) else (
+        echo   ⚠ Cannot download models - Python not available in venv
+        echo   Please download manually from:
+        echo     https://huggingface.co/lj1995/VoiceConversionWebUI
+        echo   And place in RVC\assets\hubert\ and RVC\assets\rmvpe\
+    )
+)
+
+REM Recheck if models exist after download attempt
+set RVC_MODELS_MISSING=0
+if not exist "RVC\assets\hubert\hubert_base.pt" set RVC_MODELS_MISSING=1
+if not exist "RVC\assets\rmvpe\rmvpe.pt" set RVC_MODELS_MISSING=1
+
+if %RVC_MODELS_MISSING%==1 (
+    echo.
+    echo   ⚠ Required RVC models are missing. RVC features will not work.
+    echo   Continuing with partial installation...
+    echo.
+)
+
+echo   Copying RVC files (this may take several minutes)...
+echo.
 
 REM Copy RVC venv (Python virtual environment)
 echo   Copying Python virtual environment...
 xcopy /Y /E /I /Q "RVC\venv" "%INSTALL_DIR%\RVC\venv\" >NUL
 if %errorLevel% neq 0 (
-    echo ERROR: Failed to copy RVC venv
-    pause
-    exit /b 1
+    echo   ⚠ Failed to copy RVC venv - RVC features will not work
+    set RVC_INSTALLED=0
+    goto :skip_rvc
 )
 
 REM Copy RVC configs
@@ -120,14 +229,17 @@ if exist "RVC\tools\infer_batch_rvc.py" copy /Y "RVC\tools\infer_batch_rvc.py" "
 
 REM Copy RVC assets (models)
 echo   Copying RVC models and assets...
-xcopy /Y /E /I /Q "RVC\assets\hubert" "%INSTALL_DIR%\RVC\assets\hubert\" >NUL
-xcopy /Y /E /I /Q "RVC\assets\rmvpe" "%INSTALL_DIR%\RVC\assets\rmvpe\" >NUL
-xcopy /Y /E /I /Q "RVC\assets\weights" "%INSTALL_DIR%\RVC\assets\weights\" >NUL
+if exist "RVC\assets\hubert" xcopy /Y /E /I /Q "RVC\assets\hubert" "%INSTALL_DIR%\RVC\assets\hubert\" >NUL
+if exist "RVC\assets\rmvpe" xcopy /Y /E /I /Q "RVC\assets\rmvpe" "%INSTALL_DIR%\RVC\assets\rmvpe\" >NUL
+if exist "RVC\assets\weights" xcopy /Y /E /I /Q "RVC\assets\weights" "%INSTALL_DIR%\RVC\assets\weights\" >NUL
 
 REM Copy .env if exists
 if exist "RVC\.env" copy /Y "RVC\.env" "%INSTALL_DIR%\RVC\.env" >NUL
 
+set RVC_INSTALLED=1
 echo   ✓ RVC inference engine copied
+
+:skip_rvc
 
 REM ========================================
 REM Step 3: Check Environment Variables
@@ -191,10 +303,27 @@ echo.
 echo RightClicks has been installed to:
 echo   %INSTALL_DIR%
 echo.
-echo Installation size: ~10 GB
-echo   - RightClicks app: ~50 MB
-echo   - RVC inference engine: ~10 GB
-echo.
+
+if defined RVC_INSTALLED (
+    if %RVC_INSTALLED%==1 (
+        echo Features installed:
+        echo   ✓ RightClicks core app
+        echo   ✓ RVC voice conversion ^(24+ voice models^)
+        echo.
+    ) else (
+        echo Features installed:
+        echo   ✓ RightClicks core app
+        echo   ⚠ RVC voice conversion NOT installed
+        echo.
+        echo To enable RVC features, see README.md for setup instructions.
+        echo.
+    )
+) else (
+    echo Features installed:
+    echo   ✓ RightClicks core app
+    echo.
+)
+
 echo NEXT STEPS:
 echo   1. The RightClicks system tray icon should appear shortly
 echo   2. Right-click any supported file in Windows Explorer
@@ -204,7 +333,7 @@ echo.
 echo TROUBLESHOOTING:
 echo   - If features don't appear, restart your computer
 echo   - Check logs at: %INSTALL_DIR%\logs\
-echo   - See README.md for environment variable setup
+echo   - See README.md for configuration help
 echo.
 echo Thank you for using RightClicks!
 echo.

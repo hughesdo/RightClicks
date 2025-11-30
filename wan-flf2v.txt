@@ -1,0 +1,128 @@
+{
+  "model_id": "fal-ai/wan-flf2v",
+  "display_name": "wan-flf2v (Wan-2.1)",
+  "description": "Wan-2.1 First-Last-Frame-to-Video model - Fast and cost-effective",
+  "pricing": "$0.20 at 480p, $0.40 at 720p per video",
+  "processing_time": "~1 minute",
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Video Prompt",
+      "description": "Text prompt to guide video generation",
+      "required": true,
+      "default": "A tabby cat is confidently strolling toward the camera, when it spins and with a flash of magic reveals itself to be a cat-dragon hybrid with glistening amber scales.",
+      "multiline": true,
+      "rows": 3,
+      "clear_on_focus": true
+    },
+    "negative_prompt": {
+      "type": "text",
+      "label": "Negative Prompt",
+      "description": "What to avoid in the generation",
+      "required": false,
+      "default": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
+      "multiline": true,
+      "rows": 3,
+      "clear_on_focus": false
+    },
+    "resolution": {
+      "type": "dropdown",
+      "label": "Resolution",
+      "description": "Output video resolution (480p = 0.5 units, 720p = 1 unit)",
+      "required": false,
+      "options": ["480p", "720p"],
+      "default": "480p"
+    },
+    "aspect_ratio": {
+      "type": "dropdown",
+      "label": "Aspect Ratio",
+      "description": "Video aspect ratio (auto = derived from input images)",
+      "required": false,
+      "options": ["auto", "16:9", "9:16", "1:1"],
+      "default": "auto"
+    },
+    "num_frames": {
+      "type": "slider",
+      "label": "Number of Frames",
+      "description": "Total frames (1-100). >81 increases billing by 1.25x",
+      "required": false,
+      "default": 81,
+      "min": 1,
+      "max": 100,
+      "step": 1
+    },
+    "frames_per_second": {
+      "type": "slider",
+      "label": "Frames Per Second",
+      "description": "Video frame rate (5-24 FPS)",
+      "required": false,
+      "default": 16,
+      "min": 5,
+      "max": 24,
+      "step": 1
+    },
+    "num_inference_steps": {
+      "type": "slider",
+      "label": "Inference Steps",
+      "description": "Denoising steps (2-40). Higher = better quality, slower",
+      "required": false,
+      "default": 30,
+      "min": 2,
+      "max": 40,
+      "step": 1
+    },
+    "guide_scale": {
+      "type": "slider",
+      "label": "Guidance Scale",
+      "description": "How closely to follow prompt (1-10)",
+      "required": false,
+      "default": 5.0,
+      "min": 1.0,
+      "max": 10.0,
+      "step": 0.5
+    },
+    "shift": {
+      "type": "slider",
+      "label": "Shift",
+      "description": "Shift parameter for generation (1-10)",
+      "required": false,
+      "default": 5.0,
+      "min": 1.0,
+      "max": 10.0,
+      "step": 0.5
+    },
+    "seed": {
+      "type": "number",
+      "label": "Seed",
+      "description": "Random seed for reproducibility (leave empty for random)",
+      "required": false,
+      "default": "Random",
+      "min": 0,
+      "max": 2147483647,
+      "step": 1
+    },
+    "acceleration": {
+      "type": "dropdown",
+      "label": "Acceleration",
+      "description": "Speed optimization (locked to 'regular')",
+      "required": false,
+      "options": ["regular"],
+      "default": "regular",
+      "readonly": true
+    },
+    "enable_safety_checker": {
+      "type": "checkbox",
+      "label": "Enable Safety Checker",
+      "description": "Filter inappropriate content",
+      "required": false,
+      "default": true
+    },
+    "enable_prompt_expansion": {
+      "type": "checkbox",
+      "label": "Enable Prompt Expansion",
+      "description": "Automatically enhance prompt",
+      "required": false,
+      "default": false
+    }
+  }
+}

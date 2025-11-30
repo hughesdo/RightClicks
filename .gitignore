@@ -122,6 +122,9 @@ Icons/
 !requirements*.txt
 !RVC/requirements*.txt
 !RVC/**/*.txt
+# Model configuration files needed for build
+!wan-flf2v.txt
+!first-last-frame-to-video.txt
 
 # Archive files
 *.rar

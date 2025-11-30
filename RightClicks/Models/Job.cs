@@ -68,6 +68,13 @@ public class Job
     public CancellationTokenSource? CancellationTokenSource { get; set; }
 
     /// <summary>
+    /// Whether to suppress notification for this job.
+    /// Used for informational results that don't represent actual job completion.
+    /// Example: First click in a two-click workflow (muxing feature).
+    /// </summary>
+    public bool SuppressNotification { get; set; }
+
+    /// <summary>
     /// Duration of job execution in milliseconds.
     /// </summary>
     public long DurationMs

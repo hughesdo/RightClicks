@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Newtonsoft.Json;
@@ -296,11 +297,37 @@ namespace RightClicksShellExtension
         }
 
         /// <summary>
-        /// Gets the menu icon
+        /// Gets the menu icon from embedded resources.
+        /// Falls back to null if icon cannot be loaded.
         /// </summary>
         private Image GetMenuIcon()
         {
-            // TODO: Add icon later
+            try
+            {
+                // Try to load from embedded resource
+                var assembly = Assembly.GetExecutingAssembly();
+                var resourceName = "RightClicksShellExtension.Resources.RightClick-16x16.ico";
+
+                using (var stream = assembly.GetManifestResourceStream(resourceName))
+                {
+                    if (stream != null)
+                    {
+                        // Load icon and convert to bitmap for menu display
+                        using (var icon = new Icon(stream, 16, 16))
+                        {
+                            return icon.ToBitmap();
+                        }
+                    }
+                }
+
+                DebugLog("Could not load menu icon from embedded resource");
+            }
+            catch (Exception ex)
+            {
+                DebugLog($"Error loading menu icon: {ex.Message}");
+            }
+
+            // Fallback: no icon
             return null;
         }
     }

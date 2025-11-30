@@ -1,0 +1,39 @@
+# Minimal dependencies for RVC CLI inference only
+# No training, no web UI, no visualization
+
+# Core numerical computing
+numpy==1.23.5
+scipy
+numba==0.56.4
+llvmlite==0.39.0
+
+# Audio processing - REQUIRED
+librosa==0.9.1
+soundfile>=0.12.1
+audioread
+resampy>=0.4.2
+pyworld==0.3.2
+praat-parselmouth>=0.4.2
+
+# PyTorch and ML - REQUIRED
+# torch, torchvision, torchaudio installed separately via pip with CUDA support
+fairseq==0.12.2
+faiss-cpu==1.7.3
+
+# Pitch extraction - REQUIRED
+torchcrepe==0.0.20
+torchfcpe
+
+# Audio file handling
+ffmpeg-python>=0.2.0
+pydub>=0.25.1
+
+# Configuration and utilities
+python-dotenv>=1.0.0
+tqdm>=4.63.1
+
+# Fairseq dependencies
+omegaconf==2.0.6
+hydra-core==1.0.7
+Cython
+

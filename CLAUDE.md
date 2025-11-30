@@ -294,6 +294,92 @@ End users can disable features later via UI. Our job is to validate the **comple
 
 **Note:** After setting environment variables, restart your terminal/IDE for changes to take effect.
 
+## Install.bat Maintenance (CRITICAL)
+
+**Location:** `install.bat` (repository root)
+
+**Purpose:** One-click installation script for end users. Copies all necessary files to `%LOCALAPPDATA%\RightClicks\` and registers shell extension.
+
+**⚠️ CRITICAL: Keep install.bat in sync with deployment changes!**
+
+### When to Update install.bat:
+
+**ALWAYS update install.bat when:**
+1. ✅ **New RVC dependencies added** - Update RVC folder copy commands
+2. ✅ **New environment variables required** - Add to environment variable check section
+3. ✅ **New executables/DLLs added** - Update file copy commands
+4. ✅ **New asset folders added** (e.g., new AI models) - Add xcopy commands
+5. ✅ **Installation steps change** - Update script logic and comments
+6. ✅ **New Python packages required** - Document in install.bat comments
+7. ✅ **RVC folder structure changes** - Update all RVC copy commands
+
+### Testing install.bat:
+
+**Before committing changes to install.bat, ALWAYS test on clean environment:**
+
+```powershell
+# 1. Backup current installation
+Rename-Item "$env:LOCALAPPDATA\RightClicks" "$env:LOCALAPPDATA\RightClicks.backup"
+
+# 2. Run install.bat as Administrator
+# Right-click install.bat → "Run as administrator"
+
+# 3. Verify installation
+Get-ChildItem "$env:LOCALAPPDATA\RightClicks\" -Recurse | Measure-Object -Property Length -Sum
+# Should show ~10 GB total
+
+# 4. Test RVC features
+RightClicks.exe --feature RvcBeavis --file "testfiles\test.mp3" --test-mode
+
+# 5. Check logs
+Get-Content "$env:LOCALAPPDATA\RightClicks\logs\RightClicks-TEST-*.log" | Select-Object -Last 50
+
+# 6. Restore backup if needed
+Remove-Item "$env:LOCALAPPDATA\RightClicks" -Recurse -Force
+Rename-Item "$env:LOCALAPPDATA\RightClicks.backup" "$env:LOCALAPPDATA\RightClicks"
+```
+
+### install.bat Checklist:
+
+**Before marking any deployment-related task complete, verify:**
+- [ ] Copies RightClicks.exe and all DLLs from `RightClicks\bin\Release\net8.0\`
+- [ ] Copies RVC venv folder (~8-9 GB) to `%LOCALAPPDATA%\RightClicks\RVC\venv\`
+- [ ] Copies RVC inference code (configs, infer, tools) to `%LOCALAPPDATA%\RightClicks\RVC\`
+- [ ] Copies RVC assets (hubert, rmvpe, weights) to `%LOCALAPPDATA%\RightClicks\RVC\assets\`
+- [ ] Checks for required environment variables (FAL_KEY, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET)
+- [ ] Installs shell extension via `RightClicksShellManager.exe /install`
+- [ ] Restarts Windows Explorer to load shell extension
+- [ ] Provides clear success/error messages at each step
+- [ ] Handles errors gracefully (missing files, permission issues, etc.)
+
+### Deployment Size Warning:
+
+**Total install size: ~10 GB**
+- RVC venv: ~8-9 GB (Python 3.10 + all dependencies)
+- RVC models: ~1.3 GB (24 voice models)
+- RVC assets: ~500 MB (hubert, rmvpe models)
+- RightClicks app: ~50 MB (executables, DLLs, shell extension)
+
+**Users should be warned about disk space requirements in README.md and install.bat.**
+
+### Common install.bat Issues:
+
+**Issue:** "Failed to copy RVC venv"
+- **Cause:** RVC folder not in repository root
+- **Fix:** Ensure `RVC\` folder exists at `E:\MyApps\RightClicks\RVC\`
+
+**Issue:** "Failed to install shell extension"
+- **Cause:** Not running as Administrator
+- **Fix:** Right-click install.bat → "Run as administrator"
+
+**Issue:** "RVC features not appearing"
+- **Cause:** RVC path not found by `RvcModelDiscoveryService`
+- **Fix:** Check logs, verify `%LOCALAPPDATA%\RightClicks\RVC\` exists
+
+**Issue:** "Missing environment variables"
+- **Cause:** User hasn't set API keys
+- **Fix:** Document in README.md, provide setup instructions
+
 ## Quick Reference Commands
 
 ```bash
@@ -315,6 +401,9 @@ RightClicksShellManager.exe /install
 
 # Uninstall shell hooks
 RightClicksShellManager.exe /uninstall
+
+# Run install.bat (for end users)
+# Right-click install.bat → "Run as administrator"
 ```
 
 ---

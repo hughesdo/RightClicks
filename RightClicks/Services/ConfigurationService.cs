@@ -51,6 +51,10 @@ public static class ConfigurationService
                 config = CreateDefaultConfig();
             }
 
+            // Auto-merge newly discovered features into existing config
+            // This ensures new RVC models (or any new features) are automatically added and enabled
+            config = MergeNewFeatures(config);
+
             _cachedConfig = config;
             Log.Information("Configuration loaded from: {ConfigPath}", ConfigFilePath);
             Log.Debug("Config: {FeatureCount} features, LogLevel={LogLevel}, MaxConcurrentJobs={MaxJobs}",
@@ -65,6 +69,72 @@ public static class ConfigurationService
             var defaultConfig = CreateDefaultConfig();
             _cachedConfig = defaultConfig;
             return defaultConfig;
+        }
+    }
+
+    /// <summary>
+    /// Merge newly discovered features into existing configuration.
+    /// This ensures that new RVC models (or any new features) are automatically added to config.json
+    /// and enabled by default, without requiring manual config deletion.
+    /// </summary>
+    /// <param name="config">The existing configuration loaded from disk.</param>
+    /// <returns>Updated configuration with new features merged in.</returns>
+    private static AppConfig MergeNewFeatures(AppConfig config)
+    {
+        try
+        {
+            // Discover all features (includes scanning for new .pth files)
+            var discoveredFeatures = FeatureDiscoveryService.DiscoverFeatures();
+
+            // Build a set of existing feature IDs for fast lookup
+            var existingFeatureIds = new HashSet<string>(
+                config.Features.Select(f => f.Id),
+                StringComparer.OrdinalIgnoreCase);
+
+            var newFeaturesAdded = new List<string>();
+
+            // Check each discovered feature
+            foreach (var feature in discoveredFeatures)
+            {
+                if (!existingFeatureIds.Contains(feature.Id))
+                {
+                    // New feature found - add it to config as enabled
+                    Log.Information("New feature discovered, adding to config: {FeatureId} - {DisplayName}",
+                        feature.Id, feature.DisplayName);
+
+                    config.Features.Add(new FeatureConfig
+                    {
+                        Id = feature.Id,
+                        DisplayName = feature.DisplayName,
+                        Description = feature.Description,
+                        SupportedExtensions = feature.SupportedExtensions,
+                        Enabled = true // New features enabled by default
+                    });
+
+                    newFeaturesAdded.Add(feature.Id);
+                }
+            }
+
+            // If new features were added, save the updated config
+            if (newFeaturesAdded.Count > 0)
+            {
+                Log.Information("Added {Count} new features to config: {Features}",
+                    newFeaturesAdded.Count,
+                    string.Join(", ", newFeaturesAdded));
+
+                SaveConfig(config);
+            }
+            else
+            {
+                Log.Debug("No new features to merge - config is up to date");
+            }
+
+            return config;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error merging new features into config");
+            return config; // Return original config on error
         }
     }
 

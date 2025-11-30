@@ -7,6 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Resources\RightClick-LARGE.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +26,33 @@
   <!-- Include KaraokeStyles folder in output -->
   <ItemGroup>
     <None Include="KaraokeStyles\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Include model configuration files in output -->
+  <ItemGroup>
+    <None Include="..\wan-flf2v.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>wan-flf2v.txt</Link>
+    </None>
+    <None Include="..\first-last-frame-to-video.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>first-last-frame-to-video.txt</Link>
+    </None>
+  </ItemGroup>
+
+  <!-- Include icon resources (embedded in assembly and copied to output) -->
+  <ItemGroup>
+    <Resource Include="Resources\RightClick-16x16.ico" />
+    <Resource Include="Resources\RightClick-32x32.ico" />
+    <Resource Include="Resources\RightClick-LARGE.ico" />
+    <Resource Include="Resources\RightClick-LARGE.png" />
+    <!-- Also copy to output directory for runtime loading -->
+    <None Include="Resources\*.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\*.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

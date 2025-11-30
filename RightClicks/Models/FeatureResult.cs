@@ -37,16 +37,49 @@ public class FeatureResult
     public long DurationMs { get; set; }
 
     /// <summary>
+    /// Whether to suppress notification for this result.
+    /// Used for informational results that don't represent actual job completion.
+    /// Example: First click in a two-click workflow (muxing feature).
+    /// </summary>
+    public bool SuppressNotification { get; set; }
+
+    /// <summary>
+    /// Whether this result represents an informational state change that should not create a job.
+    /// Used for multi-step workflows where only the final step should create a job.
+    /// Example: First click in muxing feature (just stores state, no job needed).
+    /// When true, the feature execution completes immediately without creating a job entry.
+    /// </summary>
+    public bool IsInformational { get; set; }
+
+    /// <summary>
     /// Create a successful result.
     /// </summary>
-    public static FeatureResult CreateSuccess(string message, string? outputFilePath = null, long durationMs = 0)
+    public static FeatureResult CreateSuccess(string message, string? outputFilePath = null, long durationMs = 0, bool suppressNotification = false)
     {
         return new FeatureResult
         {
             Success = true,
             Message = message,
             OutputFilePath = outputFilePath,
-            DurationMs = durationMs
+            DurationMs = durationMs,
+            SuppressNotification = suppressNotification
+        };
+    }
+
+    /// <summary>
+    /// Create an informational result (no job created, no notification).
+    /// Used for multi-step workflows where this is just a state change, not actual work.
+    /// </summary>
+    public static FeatureResult CreateInformational(string message, long durationMs = 0)
+    {
+        return new FeatureResult
+        {
+            Success = true,
+            Message = message,
+            OutputFilePath = null,
+            DurationMs = durationMs,
+            SuppressNotification = true,
+            IsInformational = true
         };
     }
 

@@ -767,7 +767,8 @@ public partial class MainWindow : Window
     {
         Dispatcher.Invoke(() =>
         {
-            _jobViewModels.Add(new JobViewModel(job));
+            // Insert at the top of the list (index 0) so newest jobs appear first
+            _jobViewModels.Insert(0, new JobViewModel(job));
             UpdateJobCounts();
             UpdateEmptyState();
 

@@ -1,0 +1,31 @@
+version: "3.8"
+services:
+  rvc-inference:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rvc-inference:latest
+    container_name: rvc-inference
+    volumes:
+      # Mount assets directory for models, hubert, rmvpe, and test files
+      - ./assets:/app/assets
+      # Mount output directory for generated audio
+      - ./output:/app/output
+      # Mount logs directory
+      - ./logs:/app/logs
+    ports:
+      # Expose Gradio web interface
+      - "7865:7865"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTORCH_ENABLE_MPS_FALLBACK=1
+    # Default command: show CLI help
+    command: ["python", "tools/infer_cli.py", "--help"]
+    # GPU support (optional - will auto-fallback to CPU if not available)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

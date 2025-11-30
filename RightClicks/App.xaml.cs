@@ -228,8 +228,7 @@ public partial class App : System.Windows.Application
         // Create system tray icon
         _notifyIcon = new NotifyIcon
         {
-            // TODO: Replace with actual icon file in Phase 3
-            Icon = System.Drawing.SystemIcons.Application,
+            Icon = LoadSystemTrayIcon(),
             Visible = true,
             Text = "RightClicks - Context Menu Extensions"
         };
@@ -249,10 +248,59 @@ public partial class App : System.Windows.Application
 
         _notifyIcon.ContextMenuStrip = contextMenu;
 
-        // Handle double-click to open main window
+        // Handle left-click (single click) to open main window
+        _notifyIcon.Click += (s, e) =>
+        {
+            var mouseEvent = e as MouseEventArgs;
+            if (mouseEvent != null && mouseEvent.Button == MouseButtons.Left)
+            {
+                ShowMainWindow();
+            }
+        };
+
+        // Handle double-click to open main window (backup)
         _notifyIcon.DoubleClick += (s, e) => ShowMainWindow();
 
         Log.Information("System tray icon created with context menu");
+    }
+
+    /// <summary>
+    /// Load the system tray icon from embedded resources.
+    /// Falls back to default icon if resource cannot be loaded.
+    /// </summary>
+    private System.Drawing.Icon LoadSystemTrayIcon()
+    {
+        try
+        {
+            // Try to load icon from file path (deployed location)
+            var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "RightClick-32x32.ico");
+            if (File.Exists(iconPath))
+            {
+                Log.Information("Loading system tray icon from: {IconPath}", iconPath);
+                return new System.Drawing.Icon(iconPath);
+            }
+
+            // Fallback: Try to load from embedded resource
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            var resourceName = "RightClicks.Resources.RightClick-32x32.ico";
+            using (var stream = assembly.GetManifestResourceStream(resourceName))
+            {
+                if (stream != null)
+                {
+                    Log.Information("Loading system tray icon from embedded resource: {ResourceName}", resourceName);
+                    return new System.Drawing.Icon(stream);
+                }
+            }
+
+            Log.Warning("Could not load custom system tray icon, using default");
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Error loading system tray icon, using default");
+        }
+
+        // Fallback to default Windows icon
+        return System.Drawing.SystemIcons.Application;
     }
 
     private void ShowMainWindow()
@@ -474,14 +522,18 @@ public partial class App : System.Windows.Application
     /// </summary>
     private void OnJobStatusChanged(object? sender, Job job)
     {
-        // Only show notifications for completed or failed jobs
+        // Only show notifications for completed or failed jobs (unless suppressed)
         if (job.Status == JobStatus.Completed)
         {
-            ShowNotification(
-                "Job Complete",
-                $"{job.FeatureName} completed successfully\n{Path.GetFileName(job.OutputFilePath ?? job.FilePath)}",
-                ToolTipIcon.Info
-            );
+            // Check if notification should be suppressed (e.g., first click in two-click workflow)
+            if (!job.SuppressNotification)
+            {
+                ShowNotification(
+                    "Job Complete",
+                    $"{job.FeatureName} completed successfully\n{Path.GetFileName(job.OutputFilePath ?? job.FilePath)}",
+                    ToolTipIcon.Info
+                );
+            }
         }
         else if (job.Status == JobStatus.Failed)
         {

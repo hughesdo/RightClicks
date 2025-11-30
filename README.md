@@ -29,13 +29,16 @@ Small shortcuts compound into massive time savings:
 **🚧 Active Development** — Core functionality working, expanding feature set.
 
 RightClicks currently includes:
-- ✅ **33 working features** (video, audio, image, text operations)
-- ✅ **Windows Explorer integration** (right-click context menu)
-- ✅ **Background job queue** with configurable concurrency
-- ✅ **System tray application** with configuration UI
+- ✅ **59+ working features** (video, audio, image, text operations)
+  - 35 static features (video processing, audio extraction, image manipulation, etc.)
+  - 24+ dynamic RVC voice conversion models (Beavis, Trump, Obama, etc.)
+- ✅ **Windows Explorer integration** (right-click context menu with cascading submenus)
+- ✅ **Background job queue** with configurable concurrency and cancellation support
+- ✅ **System tray application** with configuration UI and job monitoring
 - ✅ **Windows notifications with sound** for job completion
 - ✅ **Cloud-based AI features** (fal.ai integration with 5 lip sync models)
 - ✅ **Local AI transcription** (Whisper.net with 6 models, GPU-accelerated)
+- ✅ **Local AI voice conversion** (RVC with 24+ voice models)
 - ✅ **Karaoke subtitle rendering** (9 features: 3 styles × 3 quality tiers)
 
 See **[TASKS.md](TASKS.md)** for detailed development progress and roadmap.
@@ -60,6 +63,24 @@ See **[TASKS.md](TASKS.md)** for detailed development progress and roadmap.
 - ✅ **Output:** Plain text file (`.txt`) next to source file
 
 **How to use:** Right-click any audio/video file → **Transcribe ▶** → Select model
+
+---
+
+**RVC Voice Conversion** — Transform voices using AI-powered Retrieval-based Voice Conversion
+- ✅ **24+ voice models included** — Celebrities, politicians, cartoon characters, and more
+  - Politicians: Trump, Obama, Biden, Bernie Sanders, Hillary Clinton, Kamala Harris
+  - Celebrities: Elon Musk, Scarlett Johansson, Rihanna, John Lennon
+  - Characters: Beavis, Butthead, Eric Cartman, Gura, Cat
+  - Personalities: Joe Rogan, Dave Mustaine, Jon Anderson, Billy Mays, Mike Lindell
+  - Narrators: Sir David Attenborough, Lana Del Rey, Tupac
+- ✅ **Local processing** — No internet required, runs on your machine
+- ✅ **Python-based** — Uses RVC inference engine with pre-trained models
+- ✅ **Supports audio files** — MP3, WAV formats
+- ✅ **Output:** `{filename}_{ModelName}.{extension}` next to source file
+
+**How to use:** Right-click any audio file → **RVC ▶** → Select voice model
+
+**Requirements:** Python 3.10 virtual environment with RVC dependencies (included in installation)
 
 ---
 
@@ -201,29 +222,79 @@ The foundation is solid. The architecture is extensible. The vision is ambitious
 
 ---
 
-## Quick Start (For Developers)
+## Installation
+
+### For End Users
+
+**⚠️ Important:** RightClicks requires approximately **10 GB of disk space** due to the included RVC voice conversion models and Python environment.
+
+**Requirements:**
+- Windows 10/11 (64-bit)
+- .NET 8.0 Runtime (will be prompted to install if missing)
+- ~10 GB free disk space
+- Administrator privileges (for shell extension installation)
+
+**Installation Steps:**
+
+1. **Clone or download this repository:**
+   ```bash
+   git clone https://github.com/hughesdo/RightClicks.git
+   cd RightClicks
+   ```
+
+2. **Run install.bat as Administrator:**
+   - Right-click `install.bat` → "Run as administrator"
+   - The script will:
+     - Copy RightClicks application to `%LOCALAPPDATA%\RightClicks\`
+     - Copy RVC folder (~10 GB) including Python venv and voice models
+     - Install Windows Explorer shell extension
+     - Restart Windows Explorer
+
+3. **Configure API keys (optional, for cloud features):**
+   - Right-click RightClicks system tray icon → "Open RightClicks"
+   - Navigate to "API Config" tab
+   - Add your API keys:
+     - `FAL_KEY` — For fal.ai lip sync features ([get key](https://fal.ai))
+     - `CLOUDINARY_API_KEY` — For file hosting ([setup guide](cloudinary.md))
+     - `CLOUDINARY_API_SECRET` — For file deletion
+
+4. **Start using RightClicks:**
+   - Right-click any file in Windows Explorer
+   - Look for "RightClicks" in the context menu
+   - Select a feature and watch it work!
+
+**Uninstallation:**
+```bash
+cd %LOCALAPPDATA%\RightClicks
+RightClicksShellManager.exe /uninstall
+```
+
+Then delete the `%LOCALAPPDATA%\RightClicks\` folder.
+
+---
+
+### For Developers
 
 **Requirements:**
 - Windows 10/11
 - .NET 8 SDK
 - Visual Studio 2022 or VS Code
+- Python 3.10 (for RVC features)
 
-**Build:**
+**Build from Source:**
 ```bash
 git clone https://github.com/hughesdo/RightClicks.git
 cd RightClicks
-dotnet build
+dotnet build --configuration Release
 ```
 
-**Install Shell Extension (requires admin):**
-```bash
-RightClicksShellInstaller.exe /install
-```
+**Development Workflow:**
+1. Build the project (copies files to `%LOCALAPPDATA%\RightClicks\`)
+2. Kill RightClicks.exe and restart Windows Explorer before rebuilding
+3. Test features via CLI: `RightClicks.exe --feature <FeatureId> --file <FilePath> --test-mode`
+4. Check logs: `%LOCALAPPDATA%\RightClicks\logs\`
 
-**Run:**
-```bash
-RightClicks.exe
-```
+**See [CLAUDE.md](CLAUDE.md) for detailed development instructions and workflow.**
 
 The application runs in the system tray. Right-click the icon to access configuration and job queue.
 

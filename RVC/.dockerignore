@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Logs
+logs/*/
+*.log
+
+# Output files
+output/
+opt/
+
+# Training files (not needed for inference)
+assets/pretrained/
+assets/pretrained_v2/
+assets/uvr5_weights/
+
+# Training-only code (CLI inference only)
+infer-web.py
+tools/app.py
+tools/train*.py
+tools/infer/train*.py
+infer/lib/train/
+infer/modules/train/
+gui_v1.py
+
+# Documentation (not needed in container)
+*.md
+docs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+

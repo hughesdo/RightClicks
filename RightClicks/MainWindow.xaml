@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="RightClicks - Configuration"
+        Icon="pack://application:,,,/Resources/RightClick-32x32.ico"
         Height="600"
         Width="800"
         MinHeight="500"

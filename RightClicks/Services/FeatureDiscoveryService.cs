@@ -10,6 +10,7 @@ namespace RightClicks.Services
     /// <summary>
     /// Service for discovering and managing feature implementations via reflection.
     /// Automatically finds all classes that implement IFileFeature interface.
+    /// Also supports dynamically generated features (e.g., RVC voice models).
     /// </summary>
     public static class FeatureDiscoveryService
     {
@@ -36,7 +37,10 @@ namespace RightClicks.Services
                 Log.Debug("Scanning assembly: {AssemblyName}", assembly.FullName);
 
                 var featureTypes = assembly.GetTypes()
-                    .Where(t => typeof(IFileFeature).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
+                    .Where(t => typeof(IFileFeature).IsAssignableFrom(t)
+                        && !t.IsInterface
+                        && !t.IsAbstract
+                        && !t.IsNestedPrivate) // Exclude private nested classes (e.g., DynamicRvcFeature)
                     .ToList();
 
                 Log.Debug("Found {Count} feature types", featureTypes.Count);
@@ -57,7 +61,15 @@ namespace RightClicks.Services
                     }
                 }
 
-                Log.Information("Discovered {Count} features via reflection", _discoveredFeatures.Count);
+                // Add dynamically generated RVC features
+                var rvcFeatures = RvcFeatureFactory.CreateRvcFeatures();
+                _discoveredFeatures.AddRange(rvcFeatures);
+                Log.Information("Added {Count} dynamically generated RVC features", rvcFeatures.Count);
+
+                Log.Information("Discovered {Count} total features ({StaticCount} static + {DynamicCount} dynamic)",
+                    _discoveredFeatures.Count,
+                    _discoveredFeatures.Count - rvcFeatures.Count,
+                    rvcFeatures.Count);
 
                 return _discoveredFeatures;
             }

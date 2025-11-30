@@ -164,9 +164,11 @@ public class JobQueueService
     /// </summary>
     public void ClearCompleted()
     {
+        List<Job> completedJobs;
+
         lock (_lock)
         {
-            var completedJobs = _jobs
+            completedJobs = _jobs
                 .Where(j => j.Status == JobStatus.Completed ||
                            j.Status == JobStatus.Failed ||
                            j.Status == JobStatus.Cancelled)
@@ -178,6 +180,12 @@ public class JobQueueService
             }
 
             Log.Information("Cleared {Count} completed/failed/cancelled jobs", completedJobs.Count);
+        }
+
+        // Trigger JobRemoved event for each cleared job (outside lock to avoid deadlock)
+        foreach (var job in completedJobs)
+        {
+            JobRemoved?.Invoke(this, job);
         }
     }
 
@@ -295,18 +303,44 @@ public class JobQueueService
             // Execute the feature
             var result = await feature.ExecuteAsync(job.FilePath, job.CancellationTokenSource.Token);
 
+            // Check if this is an informational result (e.g., first click in two-click workflow)
+            // If so, remove the job from the queue without notification
+            if (result.IsInformational)
+            {
+                lock (_lock)
+                {
+                    _jobs.Remove(job);
+                    Log.Information("Job removed (informational result, no actual work): {JobId} - {FeatureName} - {Message}",
+                        job.Id, job.FeatureName, result.Message);
+                }
+
+                // Trigger JobRemoved event so UI updates
+                JobRemoved?.Invoke(this, job);
+                return;
+            }
+
             // Update job with result
             lock (_lock)
             {
                 job.CompletedAt = DateTime.Now;
                 job.ResultMessage = result.Message;
                 job.OutputFilePath = result.OutputFilePath;
+                job.SuppressNotification = result.SuppressNotification;
 
                 if (result.Success)
                 {
                     job.Status = JobStatus.Completed;
-                    Log.Information("Job completed successfully: {JobId} - {FeatureName} (Duration: {Duration}ms)",
-                        job.Id, job.FeatureName, job.DurationMs);
+
+                    if (result.SuppressNotification)
+                    {
+                        Log.Information("Job completed (notification suppressed): {JobId} - {FeatureName} - {Message}",
+                            job.Id, job.FeatureName, result.Message);
+                    }
+                    else
+                    {
+                        Log.Information("Job completed successfully: {JobId} - {FeatureName} (Duration: {Duration}ms)",
+                            job.Id, job.FeatureName, job.DurationMs);
+                    }
                 }
                 else
                 {

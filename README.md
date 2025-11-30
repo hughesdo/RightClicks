@@ -82,6 +82,35 @@ See **[TASKS.md](TASKS.md)** for detailed development progress and roadmap.
 
 **Requirements:** Python 3.10 virtual environment with RVC dependencies (included in installation)
 
+### RVC Voice Models - Download & Installation
+
+**⚠️ Large Files Notice:** RVC voice models are ~53 MB each. Due to GitHub's file size recommendations, only **Beavis** and **Butthead** models are included in the repository as starter/demo voices.
+
+**To add more voice models:**
+
+1. **Download RVC models** from trusted sources:
+   - [weights.gg](https://weights.gg/) — Community voice model database
+   - [Hugging Face](https://huggingface.co/) — Search for "RVC" models
+   - [AI Hub Discord](https://discord.gg/aihub) — Active RVC community
+
+2. **Place models in the weights folder BEFORE running install.bat:**
+   ```
+   RightClicks\RVC\assets\weights\
+   ```
+   Each model should be a `.pth` file (e.g., `Trump.pth`, `Obama.pth`)
+
+3. **Run install.bat** — All models in the weights folder will be copied to the installation
+
+4. **Models are auto-discovered** — RightClicks automatically finds all `.pth` files and creates menu entries for each
+
+**Model naming convention:** The filename becomes the voice name in the menu. `MyVoice.pth` appears as "RVC MyVoice" in the context menu.
+
+**Post-installation:** You can also add models directly to:
+```
+%LOCALAPPDATA%\RightClicks\RVC\assets\weights\
+```
+New models will appear after restarting Windows Explorer or RightClicks.
+
 ---
 
 **Karaoke Subtitle Rendering** — Transform videos into karaoke-style subtitled content with word-by-word highlighting

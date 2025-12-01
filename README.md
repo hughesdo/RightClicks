@@ -288,6 +288,7 @@ The foundation is solid. The architecture is extensible. The vision is ambitious
      - Set up RVC voice conversion (if configured - see below)
      - Install Windows Explorer shell extension
      - Restart Windows Explorer
+     - Launch RightClicks (system tray icon will appear)
 
 3. **Configure API keys (optional, for cloud features):**
    - Right-click RightClicks system tray icon → "Open RightClicks"

@@ -232,7 +232,7 @@ if exist "RightClicksShellExtension\bin\Release\RightClicksShellExtension.dll" (
 echo   ✓ RightClicks application copied
 
 REM ========================================
-REM Step 2: Copy RVC Inference Engine
+REM Step 2: Setup RVC Inference Engine
 REM ========================================
 echo.
 echo [2/5] Setting up RVC inference engine...
@@ -246,67 +246,34 @@ if not exist "RVC" (
     goto :skip_rvc
 )
 
-REM Check if RVC venv exists (required for RVC to work)
-if not exist "RVC\venv" (
-    echo   ⚠ RVC Python environment not found at: RVC\venv
-    echo.
-    echo   RVC requires a Python 3.10 virtual environment with dependencies.
-    echo   To set up RVC manually:
-    echo     1. Install Python 3.10
-    echo     2. cd RVC
-    echo     3. python -m venv venv
-    echo     4. venv\Scripts\activate
-    echo     5. pip install -r requirements.txt
-    echo.
-    echo   Skipping RVC installation - voice conversion features will not work.
+REM Check if RVC install.bat exists
+if not exist "RVC\install.bat" (
+    echo   ⚠ RVC install.bat not found - skipping RVC setup
     set RVC_INSTALLED=0
     goto :skip_rvc
 )
 
-REM Check for required RVC models
-set RVC_MODELS_MISSING=0
-if not exist "RVC\assets\hubert\hubert_base.pt" set RVC_MODELS_MISSING=1
-if not exist "RVC\assets\rmvpe\rmvpe.pt" set RVC_MODELS_MISSING=1
+REM Run RVC install.bat to setup Python venv and download models
+echo   Running RVC setup (this may take 15-20 minutes on first install)...
+echo.
 
-if %RVC_MODELS_MISSING%==1 (
-    echo   Downloading required RVC models...
-    echo.
+REM Save current directory and run RVC install
+pushd "%~dp0"
+call "RVC\install.bat"
+set RVC_RESULT=%errorLevel%
+popd
 
-    REM Try to download models using Python
-    if exist "RVC\venv\Scripts\python.exe" (
-        echo   Downloading hubert_base.pt ^(~181 MB^)...
-        "RVC\venv\Scripts\python.exe" -c "import requests; r=requests.get('https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/hubert_base.pt'); open('RVC/assets/hubert/hubert_base.pt','wb').write(r.content)" 2>NUL
-        if not exist "RVC\assets\hubert\hubert_base.pt" (
-            echo   ⚠ Failed to download hubert_base.pt
-        ) else (
-            echo   ✓ hubert_base.pt downloaded
-        )
-
-        echo   Downloading rmvpe.pt ^(~173 MB^)...
-        "RVC\venv\Scripts\python.exe" -c "import requests; r=requests.get('https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/rmvpe.pt'); open('RVC/assets/rmvpe/rmvpe.pt','wb').write(r.content)" 2>NUL
-        if not exist "RVC\assets\rmvpe\rmvpe.pt" (
-            echo   ⚠ Failed to download rmvpe.pt
-        ) else (
-            echo   ✓ rmvpe.pt downloaded
-        )
-    ) else (
-        echo   ⚠ Cannot download models - Python not available in venv
-        echo   Please download manually from:
-        echo     https://huggingface.co/lj1995/VoiceConversionWebUI
-        echo   And place in RVC\assets\hubert\ and RVC\assets\rmvpe\
-    )
+if %RVC_RESULT% neq 0 (
+    echo   ⚠ RVC setup failed - voice conversion features may not work
+    set RVC_INSTALLED=0
+    goto :skip_rvc
 )
 
-REM Recheck if models exist after download attempt
-set RVC_MODELS_MISSING=0
-if not exist "RVC\assets\hubert\hubert_base.pt" set RVC_MODELS_MISSING=1
-if not exist "RVC\assets\rmvpe\rmvpe.pt" set RVC_MODELS_MISSING=1
-
-if %RVC_MODELS_MISSING%==1 (
-    echo.
-    echo   ⚠ Required RVC models are missing. RVC features will not work.
-    echo   Continuing with partial installation...
-    echo.
+REM Verify RVC setup was successful
+if not exist "RVC\venv\Scripts\python.exe" (
+    echo   ⚠ RVC venv not created - voice conversion features will not work
+    set RVC_INSTALLED=0
+    goto :skip_rvc
 )
 
 echo   Copying RVC files (this may take several minutes)...

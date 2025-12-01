@@ -1,0 +1,9 @@
+# Ignore all weight files by default (too large for git)
+*
+
+# Keep this gitignore
+!.gitignore
+
+# Include Beavis & Butthead models as starter/demo voices
+!Beavis.pth
+!Butthead.pth

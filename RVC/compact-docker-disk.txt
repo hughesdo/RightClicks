@@ -1,0 +1,4 @@
+select vdisk file="C:\Users\hughe\AppData\Local\Docker\wsl\disk\docker_data.vhdx"
+compact vdisk
+exit
+

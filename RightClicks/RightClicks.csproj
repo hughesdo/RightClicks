@@ -1,0 +1,93 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Resources\RightClick-LARGE.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FFMpegCore" Version="5.4.0" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="Serilog" Version="4.3.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="9.0.0" />
+    <PackageReference Include="Whisper.net" Version="1.9.0" />
+    <PackageReference Include="Whisper.net.Runtime" Version="1.9.0" />
+    <PackageReference Include="Whisper.net.Runtime.Cuda" Version="1.9.0" />
+  </ItemGroup>
+
+  <!-- Include KaraokeStyles folder in output -->
+  <ItemGroup>
+    <None Include="KaraokeStyles\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Include model configuration files in output -->
+  <ItemGroup>
+    <None Include="..\wan-flf2v.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>wan-flf2v.txt</Link>
+    </None>
+    <None Include="..\first-last-frame-to-video.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>first-last-frame-to-video.txt</Link>
+    </None>
+  </ItemGroup>
+
+  <!-- Include icon resources (embedded in assembly and copied to output) -->
+  <ItemGroup>
+    <Resource Include="Resources\RightClick-16x16.ico" />
+    <Resource Include="Resources\RightClick-32x32.ico" />
+    <Resource Include="Resources\RightClick-LARGE.ico" />
+    <Resource Include="Resources\RightClick-LARGE.png" />
+    <!-- Also copy to output directory for runtime loading -->
+    <None Include="Resources\*.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\*.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Post-build: Copy files to %LOCALAPPDATA%\RightClicks for testing shell extension -->
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <PropertyGroup>
+      <LocalAppData>$(LOCALAPPDATA)</LocalAppData>
+      <TestInstallDir>$(LocalAppData)\RightClicks</TestInstallDir>
+      <!-- Use MSBuildProjectDirectory to get the solution root (parent of RightClicks project) -->
+      <SolutionRoot>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..'))</SolutionRoot>
+    </PropertyGroup>
+
+    <Message Text="Copying RightClicks to $(TestInstallDir) for shell extension testing..." Importance="high" />
+    <Message Text="Solution root: $(SolutionRoot)" Importance="high" />
+
+    <!-- Create directory if it doesn't exist -->
+    <MakeDir Directories="$(TestInstallDir)" />
+
+    <!-- Copy main executable and dependencies -->
+    <ItemGroup>
+      <FilesToCopy Include="$(OutDir)**\*.*" Exclude="$(OutDir)**\*.pdb" />
+    </ItemGroup>
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(TestInstallDir)\%(RecursiveDir)" SkipUnchangedFiles="true" />
+
+    <!-- Copy shell extension DLL and installer (use same Configuration as main build) -->
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellExtension\bin\$(Configuration)\RightClicksShellExtension.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellExtension\SharpShell.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <!-- Ensure .NET Framework-compatible Newtonsoft.Json is used by the shell extension -->
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellExtension\bin\$(Configuration)\Newtonsoft.Json.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="false" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\$(Configuration)\net8.0\RightClicksShellManager.exe" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\$(Configuration)\net8.0\RightClicksShellManager.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\$(Configuration)\net8.0\RightClicksShellManager.runtimeconfig.json" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+
+    <Message Text="Files copied to $(TestInstallDir)" Importance="high" />
+  </Target>
+
+</Project>

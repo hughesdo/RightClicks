@@ -1,0 +1,23 @@
+{
+  "styleName": "Classic",
+  "description": "Classic karaoke style from MP3-to-subtitles project",
+  "fontName": "MV Boli",
+  "fontSize": 98,
+  "defaultPrimaryColor": "&H00FFFFFF",
+  "defaultOutlineColor": "&H00000000",
+  "defaultOutlineThickness": 2,
+  "highlightPrimaryColor": "&H0000FFFF",
+  "highlightOutlineColor": "&H00000000",
+  "highlightOutlineThickness": 5,
+  "karaokeAnimation": "fill",
+  "highlightFadeTime": 0.4,
+  "positioning": "Bottom",
+  "marginV": 30,
+  "marginL": 10,
+  "marginR": 10,
+  "alignment": 2,
+  "playResX": 1920,
+  "playResY": 1080,
+  "whisperModel": "tiny.en"
+}
+

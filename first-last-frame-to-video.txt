@@ -1,0 +1,52 @@
+{
+  "model_id": "fal-ai/veo3.1/first-last-frame-to-video",
+  "display_name": "veo3.1 (Google Veo 3.1)",
+  "description": "Google Veo 3.1 First-Last-Frame-to-Video - High quality, supports audio generation",
+  "pricing": "$0.20/sec (audio off) or $0.40/sec (audio on)",
+  "processing_time": "~2-3 minutes",
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Text prompt describing the video you want to generate",
+      "required": true,
+      "default": "A woman looks into the camera, breathes in, then exclaims energetically, \"have you guys checked out Veo3.1 First-Last-Frame-to-Video on Fal? It's incredible!\"",
+      "multiline": true,
+      "rows": 3,
+      "clear_on_focus": true
+    },
+    "duration": {
+      "type": "dropdown",
+      "label": "Duration",
+      "description": "Video duration in seconds",
+      "required": false,
+      "options": ["4s", "6s", "8s"],
+      "default": "4s"
+    },
+    "resolution": {
+      "type": "dropdown",
+      "label": "Resolution",
+      "description": "Output video resolution",
+      "required": false,
+      "options": ["720p", "1080p"],
+      "default": "720p"
+    },
+    "aspect_ratio": {
+      "type": "dropdown",
+      "label": "Aspect Ratio",
+      "description": "Video aspect ratio",
+      "required": false,
+      "options": ["auto", "9:16", "16:9", "1:1"],
+      "default": "auto"
+    },
+    "generate_audio": {
+      "type": "checkbox",
+      "label": "Generate Audio",
+      "description": "Generate audio for the video (doubles the cost). Auto-enables when prompt contains quotes.",
+      "required": false,
+      "default": false,
+      "auto_enable_on_quotes": true
+    }
+  }
+}
+

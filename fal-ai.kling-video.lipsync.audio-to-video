@@ -1,0 +1,524 @@
+fal-ai.kling-video.lipsync.audio-to-video
+
+This one is priced at $0.014 per 5 second
+
+About
+Kling Lipsync Audio to Video API.
+
+1. Calling the API
+#
+Setup your API Key
+#
+Set FAL_KEY as an environment variable in your runtime.
+
+
+export FAL_KEY="YOUR_API_KEY"
+Submit a request
+#
+The client API handles the API submit protocol. It will handle the request status updates and return the result when the request is completed.
+
+
+response=$(curl --request POST \
+  --url https://queue.fal.run/fal-ai/kling-video/lipsync/audio-to-video \
+  --header "Authorization: Key $FAL_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{
+     "video_url": "https://fal.media/files/koala/8teUPbRRMtAUTORDvqy0l.mp4",
+     "audio_url": "https://storage.googleapis.com/falserverless/kling/kling-audio.mp3"
+   }')
+REQUEST_ID=$(echo "$response" | grep -o '"request_id": *"[^"]*"' | sed 's/"request_id": *//; s/"//g')
+Request status
+Note that the command above will not return the final result, but the process status with its request_id. You can use the Queue API commands specified below to check the status and get the final result.
+
+2. Authentication
+#
+The API uses an API Key for authentication. It is recommended you set the FAL_KEY environment variable in your runtime when possible.
+
+API Key
+#
+Protect your API Key
+When running code on the client-side (e.g. in a browser, mobile app or GUI applications), make sure to not expose your FAL_KEY. Instead, use a server-side proxy to make requests to the API. For more information, check out our server-side integration guide.
+
+3. Queue
+#
+Long-running requests
+For long-running requests, such as training jobs or models with slower inference times, it is recommended to check the Queue status and rely on Webhooks instead of blocking while waiting for the result.
+
+Submit a request
+#
+The client API provides a convenient way to submit requests to the model.
+
+
+response=$(curl --request POST \
+  --url https://queue.fal.run/fal-ai/kling-video/lipsync/audio-to-video \
+  --header "Authorization: Key $FAL_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{
+     "video_url": "https://fal.media/files/koala/8teUPbRRMtAUTORDvqy0l.mp4",
+     "audio_url": "https://storage.googleapis.com/falserverless/kling/kling-audio.mp3"
+   }')
+REQUEST_ID=$(echo "$response" | grep -o '"request_id": *"[^"]*"' | sed 's/"request_id": *//; s/"//g')
+Fetch request status
+#
+You can fetch the status of a request to check if it is completed or still in progress.
+
+
+curl --request GET \
+  --url https://queue.fal.run/fal-ai/kling-video/requests/$REQUEST_ID/status \
+  --header "Authorization: Key $FAL_KEY"
+Get the result
+#
+Once the request is completed, you can fetch the result. See the Output Schema for the expected result format.
+
+
+curl --request GET \
+  --url https://queue.fal.run/fal-ai/kling-video/requests/$REQUEST_ID \
+  --header "Authorization: Key $FAL_KEY"
+4. Files
+#
+Some attributes in the API accept file URLs as input. Whenever that's the case you can pass your own URL or a Base64 data URI.
+
+Data URI (base64)
+#
+You can pass a Base64 data URI as a file input. The API will handle the file decoding for you. Keep in mind that for large files, this alternative although convenient can impact the request performance.
+
+Hosted files (URL)
+#
+You can also pass your own URLs as long as they are publicly accessible. Be aware that some hosts might block cross-site requests, rate-limit, or consider the request as a bot.
+
+Uploading files
+#
+We provide a convenient file storage that allows you to upload files and use them in your requests. You can upload files using the client API and use the returned URL in your requests.
+
+Not available
+This functionality is not available on this client.
+Read more about file handling in our file upload guide.
+
+5. Schema
+#
+Input
+#
+video_url string
+The URL of the video to generate the lip sync for. Supports .mp4/.mov, ≤100MB, 2–10s, 720p/1080p only, width/height 720–1920px.
+
+audio_url string
+The URL of the audio to generate the lip sync for. Minimum duration is 2s and maximum duration is 60s. Maximum file size is 5MB.
+
+
+{
+  "video_url": "https://fal.media/files/koala/8teUPbRRMtAUTORDvqy0l.mp4",
+  "audio_url": "https://storage.googleapis.com/falserverless/kling/kling-audio.mp3"
+}
+Output
+#
+video File
+The generated video
+
+
+{
+  "video": {
+    "url": "https://storage.googleapis.com/falserverless/kling/kling_output.mp4"
+  }
+}
+Other types
+#
+ImageToVideoV2MasterRequest
+#
+prompt string
+image_url string
+URL of the image to be used for the video
+
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+TextToVideoV21MasterRequest
+#
+prompt string
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+aspect_ratio AspectRatioEnum
+The aspect ratio of the generated video frame Default value: "16:9"
+
+Possible enum values: 16:9, 9:16, 1:1
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+File
+#
+url string
+The URL where the file can be downloaded from.
+
+content_type string
+The mime type of the file.
+
+file_name string
+The name of the file. It will be auto-generated if not provided.
+
+file_size integer
+The size of the file in bytes.
+
+file_data string
+File data
+
+ImageToVideoRequest
+#
+prompt string
+image_url string
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+TextToVideoV25ProRequest
+#
+prompt string
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+aspect_ratio AspectRatioEnum
+The aspect ratio of the generated video frame Default value: "16:9"
+
+Possible enum values: 16:9, 9:16, 1:1
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+ImageToVideoV21MasterRequest
+#
+prompt string
+image_url string
+URL of the image to be used for the video
+
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+CameraControl
+#
+movement_type MovementTypeEnum
+The type of camera movement
+
+Possible enum values: horizontal, vertical, pan, tilt, roll, zoom
+
+movement_value integer
+The value of the camera movement
+
+ProImageToVideoRequest
+#
+prompt string
+image_url string
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+aspect_ratio AspectRatioEnum
+The aspect ratio of the generated video frame Default value: "16:9"
+
+Possible enum values: 16:9, 9:16, 1:1
+
+tail_image_url string
+URL of the image to be used for the end of the video
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+V1TextToVideoRequest
+#
+prompt string
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+aspect_ratio AspectRatioEnum
+The aspect ratio of the generated video frame Default value: "16:9"
+
+Possible enum values: 16:9, 9:16, 1:1
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+camera_control CameraControlEnum
+Camera control parameters
+
+Possible enum values: down_back, forward_up, right_turn_forward, left_turn_forward
+
+advanced_camera_control CameraControl
+Advanced Camera control parameters
+
+ImageToVideoV21StandardRequest
+#
+prompt string
+image_url string
+URL of the image to be used for the video
+
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+ImageToVideoV25StandardRequest
+#
+prompt string
+image_url string
+URL of the image to be used for the video
+
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+ImageToVideoV21ProRequest
+#
+prompt string
+image_url string
+URL of the image to be used for the video
+
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+tail_image_url string
+URL of the image to be used for the end of the video
+
+KlingV15ProImageToVideoRequest
+#
+prompt string
+image_url string
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+aspect_ratio AspectRatioEnum
+The aspect ratio of the generated video frame Default value: "16:9"
+
+Possible enum values: 16:9, 9:16, 1:1
+
+tail_image_url string
+URL of the image to be used for the end of the video
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+static_mask_url string
+URL of the image for Static Brush Application Area (Mask image created by users using the motion brush)
+
+dynamic_masks list<DynamicMask>
+List of dynamic masks
+
+LipsyncT2VRequest
+#
+video_url string
+The URL of the video to generate the lip sync for. Supports .mp4/.mov, ≤100MB, 2-60s, 720p/1080p only, width/height 720–1920px. If validation fails, an error is returned.
+
+text string
+Text content for lip-sync video generation. Max 120 characters.
+
+voice_id VoiceIdEnum
+Voice ID to use for speech synthesis
+
+Possible enum values: genshin_vindi2, zhinen_xuesheng, AOT, ai_shatang, genshin_klee2, genshin_kirara, ai_kaiya, oversea_male1, ai_chenjiahao_712, girlfriend_4_speech02, chat1_female_new-3, chat_0407_5-1, cartoon-boy-07, uk_boy1, cartoon-girl-01, PeppaPig_platform, ai_huangzhong_712, ai_huangyaoshi_712, ai_laoguowang_712, chengshu_jiejie, you_pingjing, calm_story1, uk_man2, laopopo_speech02, heainainai_speech02, reader_en_m-v1, commercial_lady_en_f-v1, tiyuxi_xuedi, tiexin_nanyou, girlfriend_1_speech02, girlfriend_2_speech02, zhuxi_speech02, uk_oldman3, dongbeilaotie_speech02, chongqingxiaohuo_speech02, chuanmeizi_speech02, chaoshandashu_speech02, ai_taiwan_man2_speech02, xianzhanggui_speech02, tianjinjiejie_speech02, diyinnansang_DB_CN_M_04-v2, yizhipiannan-v1, guanxiaofang-v2, tianmeixuemei-v1, daopianyansang-v1, mengwa-v1
+
+voice_language VoiceLanguageEnum
+The voice language corresponding to the Voice ID Default value: "en"
+
+Possible enum values: zh, en
+
+voice_speed float
+Speech rate for Text to Video generation Default value: 1
+
+DynamicMask
+#
+mask_url string
+URL of the image for Dynamic Brush Application Area (Mask image created by users using the motion brush)
+
+trajectories list<Trajectory>
+List of trajectories
+
+ImageToVideoV25ProRequest
+#
+prompt string
+image_url string
+URL of the image to be used for the video
+
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+VideoEffectsRequest
+#
+input_image_urls list<string>
+URL of images to be used for hug, kiss or heart_gesture video.
+
+effect_scene EffectSceneEnum
+The effect scene to use for the video generation
+
+Possible enum values: hug, kiss, heart_gesture, squish, expansion, fuzzyfuzzy, bloombloom, dizzydizzy, jelly_press, jelly_slice, jelly_squish, jelly_jiggle, pixelpixel, yearbook, instant_film, anime_figure, rocketrocket
+
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+TextToVideoRequest
+#
+prompt string
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+aspect_ratio AspectRatioEnum
+The aspect ratio of the generated video frame Default value: "16:9"
+
+Possible enum values: 16:9, 9:16, 1:1
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+MultiImageToVideoRequest
+#
+prompt string
+input_image_urls list<string>
+List of image URLs to use for video generation. Supports up to 4 images.
+
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+aspect_ratio AspectRatioEnum
+The aspect ratio of the generated video frame Default value: "16:9"
+
+Possible enum values: 16:9, 9:16, 1:1
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+V1ImageToVideoRequest
+#
+prompt string
+The prompt for the video
+
+image_url string
+URL of the image to be used for the video
+
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+tail_image_url string
+URL of the image to be used for the end of the video
+
+static_mask_url string
+URL of the image for Static Brush Application Area (Mask image created by users using the motion brush)
+
+dynamic_masks list<DynamicMask>
+List of dynamic masks
+
+TextToVideoV2MasterRequest
+#
+prompt string
+duration DurationEnum
+The duration of the generated video in seconds Default value: "5"
+
+Possible enum values: 5, 10
+
+aspect_ratio AspectRatioEnum
+The aspect ratio of the generated video frame Default value: "16:9"
+
+Possible enum values: 16:9, 9:16, 1:1
+
+negative_prompt string
+Default value: "blur, distort, and low quality"
+
+cfg_scale float
+The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt. Default value: 0.5
+
+Trajectory
+#
+x integer
+X coordinate of the motion trajectory
+
+y integer
+Y coordinate of the motion trajectory

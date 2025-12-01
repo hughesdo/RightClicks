@@ -1,0 +1,23 @@
+{
+  "styleName": "ModernGlow",
+  "description": "Modern style with glowing highlight effects",
+  "fontName": "Arial",
+  "fontSize": 88,
+  "defaultPrimaryColor": "&H00E0E0E0",
+  "defaultOutlineColor": "&H00202020",
+  "defaultOutlineThickness": 3,
+  "highlightPrimaryColor": "&H0000D7FF",
+  "highlightOutlineColor": "&H00FF8800",
+  "highlightOutlineThickness": 6,
+  "karaokeAnimation": "glow",
+  "highlightFadeTime": 0.3,
+  "positioning": "Bottom",
+  "marginV": 40,
+  "marginL": 10,
+  "marginR": 10,
+  "alignment": 2,
+  "playResX": 1920,
+  "playResY": 1080,
+  "whisperModel": "tiny.en"
+}
+

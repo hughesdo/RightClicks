@@ -349,6 +349,15 @@ if exist "RVC\assets\weights" xcopy /Y /E /I /Q "RVC\assets\weights" "%INSTALL_D
 REM Copy .env if exists
 if exist "RVC\.env" copy /Y "RVC\.env" "%INSTALL_DIR%\RVC\.env" >NUL
 
+REM Install python-dotenv (required by infer_cli.py)
+echo   Installing python-dotenv...
+"%INSTALL_DIR%\RVC\venv\Scripts\pip.exe" install python-dotenv >NUL 2>&1
+if !errorLevel! neq 0 (
+    echo   ⚠ Failed to install python-dotenv - RVC may not work correctly
+) else (
+    echo   ✓ python-dotenv installed
+)
+
 set RVC_INSTALLED=1
 echo   ✓ RVC inference engine copied
 

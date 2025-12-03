@@ -284,82 +284,211 @@ if not exist "RVC" (
     goto :skip_rvc
 )
 
-REM Check if RVC install.bat exists
-if not exist "RVC\install.bat" (
-    echo   ⚠ RVC install.bat not found - skipping RVC setup
+REM Check for pre-built fairseq (required - cannot be pip installed without Visual C++ Build Tools)
+if not exist "RVC\venv\Lib\site-packages\fairseq" (
+    echo   ⚠ Pre-built fairseq not found in repo - RVC will not work
+    echo   The repo should contain RVC\venv\Lib\site-packages\fairseq\
     set RVC_INSTALLED=0
     goto :skip_rvc
 )
 
-REM Run RVC install.bat to setup Python venv and download models
-echo   Running RVC setup (this may take 15-20 minutes on first install)...
+REM ----------------------------------------
+REM Step 2a: Find or Install Python 3.10+
+REM ----------------------------------------
+echo   Checking for Python 3.10+...
+
+set PYTHON_CMD=
+set PYTHON_VER=
+
+REM Try Python 3.10 first (preferred for RVC)
+for /f "tokens=*" %%i in ('py -3.10 -c "import sys; print(sys.executable)" 2^>NUL') do (
+    set PYTHON_CMD=py -3.10
+    set PYTHON_VER=3.10
+)
+
+REM Try Python 3.11 if 3.10 not found
+if not defined PYTHON_VER (
+    for /f "tokens=*" %%i in ('py -3.11 -c "import sys; print(sys.executable)" 2^>NUL') do (
+        set PYTHON_CMD=py -3.11
+        set PYTHON_VER=3.11
+    )
+)
+
+REM Try Python 3.12 if others not found
+if not defined PYTHON_VER (
+    for /f "tokens=*" %%i in ('py -3.12 -c "import sys; print(sys.executable)" 2^>NUL') do (
+        set PYTHON_CMD=py -3.12
+        set PYTHON_VER=3.12
+    )
+)
+
+if defined PYTHON_VER (
+    echo   ✓ Found Python !PYTHON_VER!
+    goto :python_found
+)
+
+REM No compatible Python found - need to install
+echo   Python 3.10+ not found. Installing Python 3.10...
 echo.
 
-REM Save current directory and run RVC install
-pushd "%~dp0"
-call "RVC\install.bat"
-set RVC_RESULT=!errorLevel!
-popd
+REM Download Python 3.10 installer
+echo   Downloading Python 3.10 installer...
+powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3.10.11/python-3.10.11-amd64.exe' -OutFile '%TEMP%\RightClicksInstall\python-3.10.11-amd64.exe' -UseBasicParsing}"
 
-if !RVC_RESULT! neq 0 (
-    echo   ⚠ RVC setup failed - voice conversion features may not work
+if not exist "%TEMP%\RightClicksInstall\python-3.10.11-amd64.exe" (
+    echo   ERROR: Failed to download Python installer.
+    echo   Please manually install Python 3.10 from:
+    echo     https://www.python.org/downloads/release/python-31011/
     set RVC_INSTALLED=0
     goto :skip_rvc
 )
 
-REM Verify RVC setup was successful
-if not exist "RVC\venv\Scripts\python.exe" (
-    echo   ⚠ RVC venv not created - voice conversion features will not work
+REM Install Python 3.10 for current user
+echo   Installing Python 3.10 (this may take a minute)...
+"%TEMP%\RightClicksInstall\python-3.10.11-amd64.exe" /quiet InstallAllUsers=0 PrependPath=0 Include_pip=1 Include_launcher=1
+
+REM Verify installation
+set PYTHON_CMD=py -3.10
+set PYTHON_VER=3.10
+for /f "tokens=*" %%i in ('py -3.10 -c "import sys; print(sys.executable)" 2^>NUL') do set PYTHON_FOUND=1
+if not defined PYTHON_FOUND (
+    echo   ERROR: Python 3.10 not accessible via py launcher.
+    echo   Please restart your computer and run this installer again.
     set RVC_INSTALLED=0
     goto :skip_rvc
 )
+echo   ✓ Python 3.10 installed
 
-echo   Copying RVC files (this may take several minutes)...
-echo.
+:python_found
 
-REM Copy RVC venv (Python virtual environment)
-echo   Copying Python virtual environment...
-xcopy /Y /E /I /Q "RVC\venv" "%INSTALL_DIR%\RVC\venv\" >NUL
+REM ----------------------------------------
+REM Step 2b: Create Virtual Environment
+REM ----------------------------------------
+echo   Creating Python virtual environment...
+
+if not exist "%INSTALL_DIR%\RVC" mkdir "%INSTALL_DIR%\RVC"
+
+REM Remove old venv if exists
+if exist "%INSTALL_DIR%\RVC\venv" (
+    echo   Removing old venv...
+    rmdir /s /q "%INSTALL_DIR%\RVC\venv" 2>NUL
+)
+
+!PYTHON_CMD! -m venv "%INSTALL_DIR%\RVC\venv"
 if !errorLevel! neq 0 (
-    echo   ⚠ Failed to copy RVC venv - RVC features will not work
+    echo   ERROR: Failed to create virtual environment.
     set RVC_INSTALLED=0
     goto :skip_rvc
 )
+echo   ✓ Virtual environment created
+
+REM ----------------------------------------
+REM Step 2c: Install Dependencies
+REM ----------------------------------------
+echo   Installing dependencies (this may take 10-15 minutes)...
+echo.
+
+REM Upgrade pip first
+echo   Upgrading pip...
+"%INSTALL_DIR%\RVC\venv\Scripts\python.exe" -m pip install --upgrade pip >NUL 2>&1
+
+REM Install PyTorch with CUDA support
+echo   Installing PyTorch with CUDA support (this may take 5-10 minutes)...
+"%INSTALL_DIR%\RVC\venv\Scripts\pip.exe" install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+if !errorLevel! neq 0 (
+    echo   ⚠ PyTorch CUDA install failed, trying CPU version...
+    "%INSTALL_DIR%\RVC\venv\Scripts\pip.exe" install --no-cache-dir torch torchvision torchaudio
+)
+
+REM Install omegaconf and hydra-core (fairseq dependencies - specific versions required)
+echo   Installing fairseq dependencies...
+"%INSTALL_DIR%\RVC\venv\Scripts\pip.exe" install "omegaconf==2.0.6" "hydra-core==1.0.7" bitarray cython regex sacrebleu --use-deprecated=legacy-resolver 2>NUL
+if !errorLevel! neq 0 (
+    "%INSTALL_DIR%\RVC\venv\Scripts\pip.exe" install "omegaconf<2.1" "hydra-core<1.1,>=1.0.7" bitarray cython regex sacrebleu 2>NUL
+)
+
+REM Install other RVC requirements
+echo   Installing RVC requirements...
+"%INSTALL_DIR%\RVC\venv\Scripts\pip.exe" install python-dotenv scipy soundfile librosa audioread ffmpeg-python av faiss-cpu praat-parselmouth pyworld torchcrepe numpy numba requests
+if !errorLevel! neq 0 (
+    echo   ⚠ Some packages failed, continuing...
+)
+
+REM Install additional requirements from file if exists
+if exist "RVC\requirements-inference.txt" (
+    echo   Installing from requirements-inference.txt...
+    "%INSTALL_DIR%\RVC\venv\Scripts\pip.exe" install -r "RVC\requirements-inference.txt" 2>NUL
+)
+
+echo   ✓ Dependencies installed
+
+REM ----------------------------------------
+REM Step 2d: Copy Pre-built Packages (fairseq)
+REM ----------------------------------------
+echo   Copying pre-built fairseq package...
+
+if not exist "%INSTALL_DIR%\RVC\venv\Lib\site-packages" mkdir "%INSTALL_DIR%\RVC\venv\Lib\site-packages"
+
+xcopy /Y /E /I /Q "RVC\venv\Lib\site-packages\fairseq" "%INSTALL_DIR%\RVC\venv\Lib\site-packages\fairseq\" >NUL
+if !errorLevel! neq 0 (
+    echo   ⚠ Failed to copy fairseq - RVC may not work
+)
+
+if exist "RVC\venv\Lib\site-packages\fairseq-0.12.2.dist-info" (
+    xcopy /Y /E /I /Q "RVC\venv\Lib\site-packages\fairseq-0.12.2.dist-info" "%INSTALL_DIR%\RVC\venv\Lib\site-packages\fairseq-0.12.2.dist-info\" >NUL
+)
+echo   ✓ Pre-built packages copied
+
+REM ----------------------------------------
+REM Step 2e: Copy RVC Code and Models
+REM ----------------------------------------
+echo   Copying RVC code and models...
 
 REM Copy RVC configs
-echo   Copying RVC configs...
-xcopy /Y /E /I /Q "RVC\configs" "%INSTALL_DIR%\RVC\configs\" >NUL
+if exist "RVC\configs" xcopy /Y /E /I /Q "RVC\configs" "%INSTALL_DIR%\RVC\configs\" >NUL
 
 REM Copy RVC infer modules
-echo   Copying RVC inference modules...
-xcopy /Y /E /I /Q "RVC\infer" "%INSTALL_DIR%\RVC\infer\" >NUL
+if exist "RVC\infer" xcopy /Y /E /I /Q "RVC\infer" "%INSTALL_DIR%\RVC\infer\" >NUL
 
 REM Copy RVC tools
-echo   Copying RVC tools...
 if not exist "%INSTALL_DIR%\RVC\tools" mkdir "%INSTALL_DIR%\RVC\tools"
-copy /Y "RVC\tools\infer_cli.py" "%INSTALL_DIR%\RVC\tools\" >NUL
+if exist "RVC\tools\infer_cli.py" copy /Y "RVC\tools\infer_cli.py" "%INSTALL_DIR%\RVC\tools\" >NUL
 if exist "RVC\tools\infer_batch_rvc.py" copy /Y "RVC\tools\infer_batch_rvc.py" "%INSTALL_DIR%\RVC\tools\" >NUL
 
-REM Copy RVC assets (models)
-echo   Copying RVC models and assets...
-if exist "RVC\assets\hubert" xcopy /Y /E /I /Q "RVC\assets\hubert" "%INSTALL_DIR%\RVC\assets\hubert\" >NUL
-if exist "RVC\assets\rmvpe" xcopy /Y /E /I /Q "RVC\assets\rmvpe" "%INSTALL_DIR%\RVC\assets\rmvpe\" >NUL
+REM Copy RVC assets (models) - download if missing
+echo   Setting up RVC models...
+if not exist "%INSTALL_DIR%\RVC\assets\hubert" mkdir "%INSTALL_DIR%\RVC\assets\hubert"
+if not exist "%INSTALL_DIR%\RVC\assets\rmvpe" mkdir "%INSTALL_DIR%\RVC\assets\rmvpe"
+if not exist "%INSTALL_DIR%\RVC\assets\weights" mkdir "%INSTALL_DIR%\RVC\assets\weights"
+
+REM Copy or download hubert model
+if exist "RVC\assets\hubert\hubert_base.pt" (
+    copy /Y "RVC\assets\hubert\hubert_base.pt" "%INSTALL_DIR%\RVC\assets\hubert\" >NUL
+) else (
+    if not exist "%INSTALL_DIR%\RVC\assets\hubert\hubert_base.pt" (
+        echo   Downloading hubert_base.pt ~181 MB...
+        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri 'https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/hubert_base.pt' -OutFile '%INSTALL_DIR%\RVC\assets\hubert\hubert_base.pt' -UseBasicParsing"
+    )
+)
+
+REM Copy or download rmvpe model
+if exist "RVC\assets\rmvpe\rmvpe.pt" (
+    copy /Y "RVC\assets\rmvpe\rmvpe.pt" "%INSTALL_DIR%\RVC\assets\rmvpe\" >NUL
+) else (
+    if not exist "%INSTALL_DIR%\RVC\assets\rmvpe\rmvpe.pt" (
+        echo   Downloading rmvpe.pt ~173 MB...
+        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri 'https://huggingface.co/lj1995/VoiceConversionWebUI/resolve/main/rmvpe.pt' -OutFile '%INSTALL_DIR%\RVC\assets\rmvpe\rmvpe.pt' -UseBasicParsing"
+    )
+)
+
+REM Copy voice model weights if available
 if exist "RVC\assets\weights" xcopy /Y /E /I /Q "RVC\assets\weights" "%INSTALL_DIR%\RVC\assets\weights\" >NUL
 
 REM Copy .env if exists
 if exist "RVC\.env" copy /Y "RVC\.env" "%INSTALL_DIR%\RVC\.env" >NUL
 
-REM Install python-dotenv (required by infer_cli.py)
-echo   Installing python-dotenv...
-"%INSTALL_DIR%\RVC\venv\Scripts\pip.exe" install python-dotenv >NUL 2>&1
-if !errorLevel! neq 0 (
-    echo   ⚠ Failed to install python-dotenv - RVC may not work correctly
-) else (
-    echo   ✓ python-dotenv installed
-)
-
 set RVC_INSTALLED=1
-echo   ✓ RVC inference engine copied
+echo   ✓ RVC inference engine installed
 
 :skip_rvc
 

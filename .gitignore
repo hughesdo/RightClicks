@@ -132,7 +132,14 @@ Icons/
 *.7z
 
 # RVC Python virtual environment (too large for git - users build their own)
-RVC/venv/
+# Ignore everything in venv EXCEPT the pre-built packages that need Visual C++ Build Tools
+RVC/venv/*
+!RVC/venv/Lib/
+RVC/venv/Lib/*
+!RVC/venv/Lib/site-packages/
+RVC/venv/Lib/site-packages/*
+!RVC/venv/Lib/site-packages/fairseq/
+!RVC/venv/Lib/site-packages/fairseq-0.12.2.dist-info/
 RVC/logs/
 RVC/output/
 

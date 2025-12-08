@@ -13,7 +13,7 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Message Text="Copying RightClicksShellExtension.dll to installer output directory..." Importance="high" />
 
-    <Copy SourceFiles="$(SolutionDir)RightClicksShellExtension\bin\$(Configuration)\RightClicksShellExtension.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="$(SolutionDir)RightClicksShellExtension\bin\Debug\RightClicksShellExtension.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
     <Copy SourceFiles="$(SolutionDir)RightClicksShellExtension\SharpShell.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
     <Copy SourceFiles="$(SolutionDir)RightClicksShellExtension\Newtonsoft.Json.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
 

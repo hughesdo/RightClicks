@@ -78,14 +78,14 @@
     </ItemGroup>
     <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(TestInstallDir)\%(RecursiveDir)" SkipUnchangedFiles="true" />
 
-    <!-- Copy shell extension DLL and installer (use same Configuration as main build) -->
-    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellExtension\bin\$(Configuration)\RightClicksShellExtension.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <!-- Copy shell extension DLL and installer -->
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellExtension\bin\Debug\RightClicksShellExtension.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
     <Copy SourceFiles="$(SolutionRoot)\RightClicksShellExtension\SharpShell.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
     <!-- Ensure .NET Framework-compatible Newtonsoft.Json is used by the shell extension -->
-    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellExtension\bin\$(Configuration)\Newtonsoft.Json.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="false" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
-    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\$(Configuration)\net8.0\RightClicksShellManager.exe" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
-    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\$(Configuration)\net8.0\RightClicksShellManager.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
-    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\$(Configuration)\net8.0\RightClicksShellManager.runtimeconfig.json" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellExtension\bin\Debug\Newtonsoft.Json.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="false" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\Debug\net8.0\RightClicksShellManager.exe" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\Debug\net8.0\RightClicksShellManager.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\Debug\net8.0\RightClicksShellManager.runtimeconfig.json" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
 
     <Message Text="Files copied to $(TestInstallDir)" Importance="high" />
   </Target>

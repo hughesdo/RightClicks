@@ -1,9 +1,11 @@
-# Ignore all weight files by default (too large for git)
-*
+# RVC voice models are stored as compressed .zip files to save space
+# install.bat extracts them to .pth files during installation
+
+# Ignore extracted .pth files (generated during install)
+*.pth
 
 # Keep this gitignore
 !.gitignore
 
-# Include Beavis & Butthead models as starter/demo voices
-!Beavis.pth
-!Butthead.pth
+# Include compressed model files
+!*.zip

@@ -481,8 +481,18 @@ if exist "RVC\assets\rmvpe\rmvpe.pt" (
     )
 )
 
-REM Copy voice model weights if available
-if exist "RVC\assets\weights" xcopy /Y /E /I /Q "RVC\assets\weights" "%INSTALL_DIR%\RVC\assets\weights\" >NUL
+REM Extract and copy voice model weights
+echo   Extracting RVC voice models...
+if exist "RVC\assets\weights\*.zip" (
+    REM Extract all compressed models to installation directory
+    powershell -Command "Get-ChildItem 'RVC\assets\weights\*.zip' | ForEach-Object { Expand-Archive -Path $_.FullName -DestinationPath '%INSTALL_DIR%\RVC\assets\weights\' -Force }"
+    echo   ✓ Extracted 24 voice models
+) else (
+    echo   ⚠ No compressed models found - RVC features may be limited
+)
+
+REM Copy .gitignore and any other non-model files
+if exist "RVC\assets\weights\.gitignore" copy /Y "RVC\assets\weights\.gitignore" "%INSTALL_DIR%\RVC\assets\weights\" >NUL
 
 REM Copy .env if exists
 if exist "RVC\.env" copy /Y "RVC\.env" "%INSTALL_DIR%\RVC\.env" >NUL

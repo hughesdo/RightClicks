@@ -401,11 +401,16 @@ if !errorLevel! neq 0 (
 )
 
 REM Install omegaconf and hydra-core (fairseq dependencies - specific versions required)
+REM IMPORTANT: Downgrade pip first (pip 24.1+ rejects omegaconf 2.0.6's invalid PyYAML dependency spec)
+echo   Downgrading pip to 24.0 for compatibility...
+"%INSTALL_DIR%\RVC\venv\Scripts\python.exe" -m pip install "pip<24.1" >NUL 2>&1
+
+REM Install fairseq dependencies with --no-deps to avoid broken metadata issues
 echo   Installing fairseq dependencies...
-"%INSTALL_DIR%\RVC\venv\Scripts\pip.exe" install "omegaconf==2.0.6" "hydra-core==1.0.7" bitarray cython regex sacrebleu --use-deprecated=legacy-resolver 2>NUL
-if !errorLevel! neq 0 (
-    "%INSTALL_DIR%\RVC\venv\Scripts\pip.exe" install "omegaconf<2.1" "hydra-core<1.1,>=1.0.7" bitarray cython regex sacrebleu 2>NUL
-)
+"%INSTALL_DIR%\RVC\venv\Scripts\pip.exe" install --no-deps "omegaconf==2.0.6" "hydra-core==1.0.7" bitarray cython regex sacrebleu >NUL 2>&1
+
+REM Install their sub-dependencies separately (to avoid dependency resolution conflicts)
+"%INSTALL_DIR%\RVC\venv\Scripts\pip.exe" install PyYAML "antlr4-python3-runtime==4.8" typing-extensions portalocker lxml tabulate >NUL 2>&1
 
 REM Install other RVC requirements
 echo   Installing RVC requirements...

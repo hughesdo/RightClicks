@@ -34,6 +34,7 @@ public partial class MainWindow : Window
         LoadConfiguration();
         LoadApiKeys();
         LoadCloudinaryConfig();
+        LoadVideoDownloaderSettings();
         InitializeJobQueue();
     }
 
@@ -1287,6 +1288,146 @@ $Shortcut.Save()
 
     #endregion
 
+    #region Automated Jobs Configuration
+
+    private ObservableCollection<PlatformToggleViewModel> _platformToggles = new();
+
+    /// <summary>
+    /// Load video downloader settings into UI.
+    /// </summary>
+    private void LoadVideoDownloaderSettings()
+    {
+        Log.Information("Loading video downloader settings...");
+
+        // Set enabled checkbox
+        VideoDownloadEnabledCheckBox.IsChecked = _config.VideoDownloader.Enabled;
+
+        // Set download path
+        VideoDownloadPathTextBox.Text = _config.VideoDownloader.DownloadPath;
+
+        // Load platform toggles
+        _platformToggles.Clear();
+        foreach (var platform in VideoDownloaderService.PlatformPatterns.Keys)
+        {
+            var isEnabled = _config.VideoDownloader.Platforms.TryGetValue(platform, out var enabled) && enabled;
+            _platformToggles.Add(new PlatformToggleViewModel
+            {
+                PlatformName = platform,
+                IsEnabled = isEnabled
+            });
+        }
+
+        PlatformTogglesControl.ItemsSource = _platformToggles;
+
+        Log.Information("Video downloader settings loaded. {PlatformCount} platforms", _platformToggles.Count);
+    }
+
+    /// <summary>
+    /// Handle Video Download Enabled checkbox changed.
+    /// </summary>
+    private void VideoDownloadEnabledCheckBox_Changed(object sender, RoutedEventArgs e)
+    {
+        Log.Debug("Video download enabled changed: {Enabled}", VideoDownloadEnabledCheckBox.IsChecked);
+    }
+
+    /// <summary>
+    /// Handle Video Download Path TextBox changed.
+    /// </summary>
+    private void VideoDownloadPathTextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        Log.Debug("Video download path changed: {Path}", VideoDownloadPathTextBox.Text);
+    }
+
+    /// <summary>
+    /// Handle Browse button click for video download path.
+    /// </summary>
+    private void BrowseVideoDownloadPath_Click(object sender, RoutedEventArgs e)
+    {
+        Log.Information("Browse video download path button clicked");
+
+        try
+        {
+            // Use Windows Forms FolderBrowserDialog
+            using var dialog = new System.Windows.Forms.FolderBrowserDialog
+            {
+                Description = "Select Video Download Folder",
+                ShowNewFolderButton = true,
+                SelectedPath = Environment.ExpandEnvironmentVariables(VideoDownloadPathTextBox.Text)
+            };
+
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                VideoDownloadPathTextBox.Text = dialog.SelectedPath;
+                Log.Information("Video download path selected: {Path}", dialog.SelectedPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error browsing for video download path");
+            MessageBox.Show(
+                $"Error selecting folder:\n{ex.Message}",
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
+    /// Handle platform toggle changed.
+    /// </summary>
+    private void PlatformToggle_Changed(object sender, RoutedEventArgs e)
+    {
+        Log.Debug("Platform toggle changed");
+    }
+
+    /// <summary>
+    /// Handle Save Automated Jobs Configuration button click.
+    /// </summary>
+    private void SaveAutomatedJobsButton_Click(object sender, RoutedEventArgs e)
+    {
+        Log.Information("Saving automated jobs configuration...");
+
+        try
+        {
+            // Update config from UI
+            _config.VideoDownloader.Enabled = VideoDownloadEnabledCheckBox.IsChecked ?? false;
+            _config.VideoDownloader.DownloadPath = VideoDownloadPathTextBox.Text;
+
+            // Update platform settings
+            _config.VideoDownloader.Platforms.Clear();
+            foreach (var platform in _platformToggles)
+            {
+                _config.VideoDownloader.Platforms[platform.PlatformName] = platform.IsEnabled;
+            }
+
+            // Save config
+            ConfigurationService.SaveConfig(_config);
+
+            Log.Information("Automated jobs configuration saved successfully");
+            MessageBox.Show(
+                "Automated jobs configuration saved successfully!\n\n" +
+                "Note: Changes will take effect immediately for new clipboard detections.",
+                "RightClicks",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+
+            // Notify App to update services
+            var app = (App)System.Windows.Application.Current;
+            app.UpdateVideoDownloaderSettings(_config.VideoDownloader);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to save automated jobs configuration");
+            MessageBox.Show(
+                $"Failed to save configuration:\n{ex.Message}",
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
+    #endregion
+
     /// <summary>
     /// Handle window closing - minimize to tray instead of exiting
     /// </summary>
@@ -1648,6 +1789,48 @@ public class CloudinaryConfigViewModel : INotifyPropertyChanged
 
     public string ApiKeyVisibilityIcon => IsApiKeyVisible ? "🙈" : "👁️";
     public string ApiSecretVisibilityIcon => IsApiSecretVisible ? "🙈" : "👁️";
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}
+
+/// <summary>
+/// View model for platform toggle display in Automated Jobs tab
+/// </summary>
+public class PlatformToggleViewModel : INotifyPropertyChanged
+{
+    private string _platformName = string.Empty;
+    private bool _isEnabled;
+
+    public string PlatformName
+    {
+        get => _platformName;
+        set
+        {
+            if (_platformName != value)
+            {
+                _platformName = value;
+                OnPropertyChanged(nameof(PlatformName));
+            }
+        }
+    }
+
+    public bool IsEnabled
+    {
+        get => _isEnabled;
+        set
+        {
+            if (_isEnabled != value)
+            {
+                _isEnabled = value;
+                OnPropertyChanged(nameof(IsEnabled));
+            }
+        }
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

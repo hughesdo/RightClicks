@@ -269,6 +269,16 @@ if exist "RightClicksShellExtension\bin\Release\RightClicksShellExtension.dll" (
 
 echo   ✓ RightClicks application copied
 
+REM Copy yt-dlp.exe for video downloading
+if not exist "%INSTALL_DIR%\bin" mkdir "%INSTALL_DIR%\bin"
+if exist "RightClicks\bin\yt-dlp.exe" (
+    echo   Copying yt-dlp.exe for video downloads...
+    copy /Y "RightClicks\bin\yt-dlp.exe" "%INSTALL_DIR%\bin\" >NUL
+    echo   ✓ yt-dlp.exe copied
+) else (
+    echo   ⚠ yt-dlp.exe not found in RightClicks\bin\ - video downloads will not work
+)
+
 REM ========================================
 REM Step 2: Setup RVC Inference Engine
 REM ========================================

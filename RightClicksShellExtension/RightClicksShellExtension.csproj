@@ -1,4 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  RightClicksShellExtension - Windows Explorer Context Menu Extension
+
+  ⚠️ CRITICAL: THIS PROJECT MUST REMAIN .NET FRAMEWORK 4.8 ⚠️
+
+  This DLL is a COM server that gets loaded DIRECTLY INTO explorer.exe.
+  Windows Explorer is a native 64-bit process that can ONLY host .NET Framework assemblies.
+  .NET 8 / .NET Core / .NET 5+ assemblies CANNOT be loaded by Explorer.
+
+  This is a Windows limitation that cannot be changed.
+
+  DEPENDENCIES MUST ALSO BE .NET FRAMEWORK COMPATIBLE:
+  - SharpShell.dll - Shell extension framework (.NET Framework)
+  - Newtonsoft.Json.dll - Must be the .NET Framework version, NOT the .NET 8 version
+
+  If the wrong Newtonsoft.Json.dll is used, you'll see:
+  "Could not load file or assembly 'System.Runtime, Version=6.0.0.0'"
+
+  See CLAUDE.md "⚠️ CRITICAL: .NET Version Compatibility" section for full details.
+-->
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -9,6 +29,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RightClicksShellExtension</RootNamespace>
     <AssemblyName>RightClicksShellExtension</AssemblyName>
+    <!-- ⚠️ DO NOT CHANGE - Must be .NET Framework 4.8 for Windows Explorer compatibility -->
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>

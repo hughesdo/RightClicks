@@ -38,6 +38,65 @@ End users can disable features later via UI. Our job is to validate the **comple
 - Prevents "works on my machine" problems (environment variables validated)
 - Avoids stale DLLs and config files (explicit cleanup steps)
 
+## ⚠️ CRITICAL: .NET Version Compatibility
+
+### The Hybrid Architecture Problem
+
+RightClicks uses THREE projects with DIFFERENT .NET versions:
+
+| Project | Target Framework | Purpose | Why This Version |
+|---------|-----------------|---------|------------------|
+| **RightClicks** | .NET 8.0 | Main WPF app, features, job queue | Modern framework, best NuGet support |
+| **RightClicksShellExtension** | .NET Framework 4.8 | Context menu DLL loaded by Explorer | **Windows Explorer can ONLY load .NET Framework** |
+| **RightClicksShellInstaller** | .NET 8.0 | CLI tool for shell registration | Uses SharpShell's ServerRegistrationManager |
+
+### Why Shell Extension MUST Be .NET Framework 4.8
+
+- `RightClicksShellExtension.dll` is a **COM server** loaded directly into `explorer.exe`
+- Windows Explorer is a **native 64-bit process** that can only host **.NET Framework** assemblies
+- **SharpShell** (our shell extension library) only works with .NET Framework 4.x
+- This is a Windows limitation that cannot be changed - .NET 8 DLLs cannot run inside Explorer
+
+### The Newtonsoft.Json DLL Conflict (LESSON LEARNED 2025-12-10)
+
+**The Problem:**
+- Both RightClicks (.NET 8) and RightClicksShellExtension (.NET 4.8) need `Newtonsoft.Json`
+- .NET 8's Newtonsoft.Json references `System.Runtime, Version=6.0.0.0`
+- .NET Framework 4.8 does NOT have `System.Runtime` - it causes assembly load failure
+- If the wrong version is in `%LOCALAPPDATA%\RightClicks\`, the shell extension breaks silently
+
+**The Symptom:**
+- Right-clicking files shows only "Open RightClicks..." instead of cascading feature menus
+- `ShellExtension-Debug.log` shows: `Could not load file or assembly 'System.Runtime, Version=6.0.0.0'`
+
+**The Fix:**
+- Build copies must ensure the **.NET Framework-compatible Newtonsoft.Json.dll** ends up in the install folder
+- The shell extension's DLL must be copied AFTER the main app's files (to overwrite the .NET 8 version)
+- See `RightClicks.csproj` post-build target - the order of Copy commands matters!
+
+### Build Order Requirements
+
+The `RightClicks.csproj` post-build event MUST:
+1. First copy all main app files (including .NET 8 Newtonsoft.Json)
+2. THEN copy shell extension files (overwriting with .NET Framework Newtonsoft.Json)
+3. Use `SkipUnchangedFiles="false"` for Newtonsoft.Json to force overwrite
+
+**NEVER change the copy order without understanding this constraint!**
+
+### Quick Diagnostic
+
+If context menus stop working, check the debug log:
+```powershell
+Get-Content "$env:LOCALAPPDATA\RightClicks\logs\ShellExtension-Debug.log" | Select-Object -Last 20
+```
+
+If you see `System.Runtime` errors, the wrong Newtonsoft.Json.dll was copied:
+```powershell
+# Fix: Copy the correct DLL from shell extension
+Copy-Item "RightClicksShellExtension\bin\Release\Newtonsoft.Json.dll" "$env:LOCALAPPDATA\RightClicks\" -Force
+taskkill /F /IM explorer.exe; Start-Sleep 2; Start-Process explorer.exe
+```
+
 ## Development Workflow (CRITICAL)
 
 ### For Every Task:

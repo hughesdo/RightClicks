@@ -253,6 +253,16 @@ public static class ConfigurationService
                 LogRetentionDays = 7,
                 CheckForUpdates = true,
                 OutputPath = null // null means output next to source file
+            },
+            VideoDownloader = new VideoDownloaderSettings
+            {
+                Enabled = true,
+                DownloadPath = "%USERPROFILE%\\Videos",
+                Platforms = new Dictionary<string, bool>
+                {
+                    { "YouTube", true },
+                    { "X", true }
+                }
             }
         };
     }

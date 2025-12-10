@@ -32,6 +32,11 @@ public class AppConfig
     /// Application settings.
     /// </summary>
     public AppSettings Settings { get; set; } = new();
+
+    /// <summary>
+    /// Video downloader settings for clipboard monitoring.
+    /// </summary>
+    public VideoDownloaderSettings VideoDownloader { get; set; } = new();
 }
 
 /// <summary>
@@ -97,5 +102,40 @@ public class CloudinaryConfig
     /// Default: "CLOUDINARY_API_SECRET"
     /// </summary>
     public string ApiSecretEnvVar { get; set; } = "CLOUDINARY_API_SECRET";
+}
+
+/// <summary>
+/// Video downloader settings for clipboard monitoring and auto-download.
+/// </summary>
+public class VideoDownloaderSettings
+{
+    /// <summary>
+    /// Whether clipboard monitoring is enabled.
+    /// Default: true
+    /// </summary>
+    public bool Enabled { get; set; } = true;
+
+    /// <summary>
+    /// Download destination folder.
+    /// Default: %USERPROFILE%\Videos
+    /// </summary>
+    public string DownloadPath { get; set; } = "%USERPROFILE%\\Videos";
+
+    /// <summary>
+    /// Per-platform enable/disable settings.
+    /// Key: Platform name (e.g., "YouTube", "X")
+    /// Value: Whether downloads from this platform are enabled
+    /// </summary>
+    public Dictionary<string, bool> Platforms { get; set; } = new()
+    {
+        { "YouTube", true },
+        { "X", true },
+        { "TikTok", true },
+        { "Instagram", true },
+        { "Facebook", true },
+        { "Reddit", true },
+        { "Vimeo", true },
+        { "Twitch", true }
+    };
 }
 

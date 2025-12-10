@@ -23,6 +23,8 @@ public partial class App : System.Windows.Application
     private Mutex? _singleInstanceMutex = null;
     private IpcService? _ipcService = null;
     private FileStream? _lockFileStream = null;
+    private ClipboardMonitorService? _clipboardMonitor = null;
+    private VideoDownloaderService? _videoDownloader = null;
 
     /// <summary>
     /// Job queue service instance (shared across application).
@@ -154,6 +156,27 @@ public partial class App : System.Windows.Application
         _ipcService.StartListening();
         Log.Information("IPC service initialized");
 
+        // Initialize video downloader and clipboard monitor (if enabled)
+        if (config.VideoDownloader.Enabled)
+        {
+            Log.Information("Initializing video downloader and clipboard monitor...");
+            _videoDownloader = new VideoDownloaderService(config.VideoDownloader);
+            _clipboardMonitor = new ClipboardMonitorService(_videoDownloader, config.VideoDownloader.Enabled);
+
+            // Show notification when download starts/completes
+            _videoDownloader.DownloadCompleted += (s, e) =>
+                ShowNotification("Video Downloaded", $"{e.Platform} video saved to {Path.GetFileName(e.DownloadFolder)}", ToolTipIcon.Info);
+            _videoDownloader.DownloadFailed += (s, e) =>
+                ShowNotification("Download Failed", $"{e.Platform}: {e.Error}", ToolTipIcon.Error);
+
+            Log.Information("Clipboard monitor initialized. Platforms: {Platforms}",
+                string.Join(", ", config.VideoDownloader.Platforms.Where(p => p.Value).Select(p => p.Key)));
+        }
+        else
+        {
+            Log.Information("Video downloader disabled in config");
+        }
+
         // Handle feature execution via CLI
         if (!string.IsNullOrEmpty(_featureId) && !string.IsNullOrEmpty(_filePath))
         {
@@ -200,6 +223,9 @@ public partial class App : System.Windows.Application
         // Dispose IPC service
         _ipcService?.Dispose();
 
+        // Dispose clipboard monitor
+        _clipboardMonitor?.Dispose();
+
         // Dispose job queue service
         JobQueueService?.Dispose();
 
@@ -221,6 +247,39 @@ public partial class App : System.Windows.Application
 
         LoggingService.CloseLogger();
         base.OnExit(e);
+    }
+
+    /// <summary>
+    /// Update video downloader settings from UI.
+    /// </summary>
+    public void UpdateVideoDownloaderSettings(VideoDownloaderSettings settings)
+    {
+        Log.Information("Updating video downloader settings. Enabled: {Enabled}", settings.Enabled);
+
+        // Update clipboard monitor enabled state
+        if (_clipboardMonitor != null)
+        {
+            _clipboardMonitor.SetEnabled(settings.Enabled);
+        }
+        else if (settings.Enabled)
+        {
+            // Initialize if not already running
+            _videoDownloader = new VideoDownloaderService(settings);
+            _clipboardMonitor = new ClipboardMonitorService(_videoDownloader, settings.Enabled);
+
+            _videoDownloader.DownloadCompleted += (s, e) =>
+                ShowNotification("Video Downloaded", $"{e.Platform} video saved to {Path.GetFileName(e.DownloadFolder)}", ToolTipIcon.Info);
+            _videoDownloader.DownloadFailed += (s, e) =>
+                ShowNotification("Download Failed", $"{e.Platform}: {e.Error}", ToolTipIcon.Error);
+        }
+
+        // Update video downloader settings
+        if (_videoDownloader != null)
+        {
+            _videoDownloader.UpdateSettings(settings);
+        }
+
+        Log.Information("Video downloader settings updated");
     }
 
     private void InitializeSystemTray()

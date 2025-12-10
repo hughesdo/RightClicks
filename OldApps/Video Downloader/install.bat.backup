@@ -1,0 +1,274 @@
+@echo off
+setlocal enabledelayedexpansion
+
+echo ========================================
+echo SystemTrayApp - Video Downloader
+echo Installation Script
+echo ========================================
+echo.
+
+REM Get the directory where this script is located
+set "INSTALL_DIR=%~dp0"
+set "INSTALL_DIR=%INSTALL_DIR:~0,-1%"
+
+echo Installation directory: %INSTALL_DIR%
+echo.
+
+REM Check for .NET Framework 4.8 (pre-installed on Windows 10/11)
+echo [0/4] Checking .NET Framework...
+set "DOTNET_FOUND=0"
+
+REM Check registry for .NET 4.8
+reg query "HKLM\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" /v Release >nul 2>&1
+if !errorlevel! equ 0 (
+    for /f "tokens=3" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" /v Release ^| findstr Release') do set RELEASE=%%a
+    REM .NET 4.8 = 528040 or higher
+    if !RELEASE! geq 528040 (
+        set "DOTNET_FOUND=1"
+        echo    ✓ .NET Framework 4.8 is installed
+    ) else (
+        echo    ℹ .NET Framework found, but version is older than 4.8
+        echo    ✓ App should still work, but 4.8 is recommended
+        set "DOTNET_FOUND=1"
+    )
+)
+
+if !DOTNET_FOUND! equ 0 (
+    echo    ✗ .NET Framework 4.8 NOT found
+    echo.
+    echo    ERROR: This application requires .NET Framework 4.8
+    echo.
+    echo    Good news: Windows 10 and 11 have this pre-installed!
+    echo    If you're on Windows 7/8, download from:
+    echo    https://dotnet.microsoft.com/download/dotnet-framework/net48
+    echo.
+    choice /C YN /M "Would you like to open the download page now"
+    if !errorlevel! equ 1 (
+        start https://dotnet.microsoft.com/download/dotnet-framework/net48
+        echo.
+        echo    Please install .NET Framework 4.8, then run this installer again.
+        echo.
+        pause
+        exit /b 1
+    ) else (
+        echo.
+        echo    Please install .NET Framework 4.8 and run this installer again.
+        echo.
+        pause
+        exit /b 1
+    )
+)
+echo.
+
+REM Check if we're in the Release folder
+if exist "%INSTALL_DIR%\SystemTrayApp.exe" (
+    set "EXE_PATH=%INSTALL_DIR%\SystemTrayApp.exe"
+    set "STARTUP_DIR=%INSTALL_DIR%"
+    echo Found application at: !EXE_PATH!
+    echo.
+) else (
+    if exist "%INSTALL_DIR%\bin\Release\SystemTrayApp.exe" (
+        set "EXE_PATH=%INSTALL_DIR%\bin\Release\SystemTrayApp.exe"
+        set "STARTUP_DIR=%INSTALL_DIR%\bin\Release"
+        echo Found application at: !EXE_PATH!
+        echo.
+    ) else (
+        echo Application not found. Building from source...
+    echo.
+
+    REM Check if solution file exists
+    if not exist "%INSTALL_DIR%\SystemTrayApp.sln" (
+        echo ERROR: SystemTrayApp.sln not found!
+        echo Please run this script from the application directory.
+        echo.
+        pause
+        exit /b 1
+    )
+
+    REM Try to find MSBuild
+    echo Looking for MSBuild...
+    set MSBUILD_PATH=
+
+    REM Check common Visual Studio 2022 locations
+    if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" (
+        set "MSBUILD_PATH=C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe"
+    )
+    if not defined MSBUILD_PATH if exist "C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MSBuild.exe" (
+        set "MSBUILD_PATH=C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MSBuild.exe"
+    )
+    if not defined MSBUILD_PATH if exist "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe" (
+        set "MSBUILD_PATH=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe"
+    )
+    if not defined MSBUILD_PATH if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe" (
+        set "MSBUILD_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe"
+    )
+    if not defined MSBUILD_PATH if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin\MSBuild.exe" (
+        set "MSBUILD_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin\MSBuild.exe"
+    )
+    if not defined MSBUILD_PATH if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe" (
+        set "MSBUILD_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe"
+    )
+
+    REM Try to find MSBuild in PATH
+    if not defined MSBUILD_PATH (
+        where msbuild.exe >nul 2>&1
+        if !errorlevel! equ 0 (
+            set "MSBUILD_PATH=msbuild.exe"
+        )
+    )
+
+    if not defined MSBUILD_PATH (
+        echo.
+        echo ERROR: MSBuild not found!
+        echo.
+        echo This application needs to be built before installation.
+        echo Please install Visual Studio 2019 or later with .NET desktop development workload.
+        echo.
+        echo Download Visual Studio Community (free):
+        echo https://visualstudio.microsoft.com/downloads/
+        echo.
+        echo Or build manually using Visual Studio and run this installer again.
+        echo.
+        pause
+        exit /b 1
+    )
+
+    echo    ✓ Found MSBuild
+    echo.
+    echo Building application (this may take a minute)...
+    echo.
+
+    REM Build the solution
+    "!MSBUILD_PATH!" "%INSTALL_DIR%\SystemTrayApp.sln" /t:Rebuild /p:Configuration=Release /p:Platform=x86 /v:minimal /nologo
+
+    if !errorlevel! neq 0 (
+        echo.
+        echo ERROR: Build failed!
+        echo Please check the error messages above.
+        echo.
+        pause
+        exit /b 1
+    )
+
+    REM Verify the build output
+    if exist "%INSTALL_DIR%\bin\Release\SystemTrayApp.exe" (
+        set "EXE_PATH=%INSTALL_DIR%\bin\Release\SystemTrayApp.exe"
+        set "STARTUP_DIR=%INSTALL_DIR%\bin\Release"
+        echo.
+        echo    ✓ Build successful!
+        echo    ✓ Application built at: !EXE_PATH!
+        echo.
+    ) else (
+        echo.
+        echo ERROR: Build completed but SystemTrayApp.exe not found!
+        echo Expected location: %INSTALL_DIR%\bin\Release\SystemTrayApp.exe
+        echo.
+        pause
+        exit /b 1
+    )
+    )
+)
+
+REM Create startup shortcut
+echo [1/4] Creating startup shortcut...
+set "STARTUP_FOLDER=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
+set "SHORTCUT_PATH=%STARTUP_FOLDER%\SystemTrayApp.lnk"
+
+REM Use PowerShell to create shortcut
+powershell -Command "$WS = New-Object -ComObject WScript.Shell; $SC = $WS.CreateShortcut('%SHORTCUT_PATH%'); $SC.TargetPath = '!EXE_PATH!'; $SC.WorkingDirectory = '!STARTUP_DIR!'; $SC.Description = 'System Tray Video Downloader'; $SC.Save()"
+
+if exist "%SHORTCUT_PATH%" (
+    echo    ✓ Startup shortcut created successfully
+) else (
+    echo    ✗ Failed to create startup shortcut
+)
+echo.
+
+REM Check for yt-dlp.exe
+echo [2/4] Checking for yt-dlp.exe...
+
+set "YTDLP_FOUND=0"
+
+REM Check in application directory
+if exist "!STARTUP_DIR!\yt-dlp.exe" (
+    echo    ✓ Found yt-dlp.exe in application directory
+    set "YTDLP_FOUND=1"
+)
+
+REM Check in C:\bin
+if exist "C:\bin\yt-dlp.exe" (
+    echo    ✓ Found yt-dlp.exe in C:\bin
+    set "YTDLP_FOUND=1"
+)
+
+REM Check in PATH
+where yt-dlp.exe >nul 2>&1
+if !errorlevel! equ 0 (
+    echo    ✓ Found yt-dlp.exe in PATH
+    set "YTDLP_FOUND=1"
+)
+
+if !YTDLP_FOUND! equ 0 (
+    echo    ℹ yt-dlp.exe not found
+    echo.
+    echo    The application will offer to download it automatically on first run.
+    echo    Or you can download it manually from:
+    echo    https://github.com/yt-dlp/yt-dlp/releases
+    echo.
+    echo    Recommended location: !STARTUP_DIR!\yt-dlp.exe
+    echo                      or: C:\bin\yt-dlp.exe
+)
+echo.
+
+REM Create Memes folder in Documents
+echo [3/4] Setting up download folder...
+set "MEMES_FOLDER=%USERPROFILE%\Documents\Memes"
+if not exist "%MEMES_FOLDER%" (
+    mkdir "%MEMES_FOLDER%" 2>nul
+    if exist "%MEMES_FOLDER%" (
+        echo    ✓ Created Memes folder in Documents
+    ) else (
+        echo    ℹ Memes folder will be created automatically
+    )
+) else (
+    echo    ✓ Memes folder already exists
+)
+echo.
+
+echo [4/4] Installation complete!
+echo.
+echo ========================================
+echo Installation Complete!
+echo ========================================
+echo.
+echo The application will:
+echo  • Start automatically when Windows starts
+echo  • Monitor clipboard for video URLs
+echo  • Download videos to: %USERPROFILE%\Documents\Memes_YYYY-MM-DD\
+echo.
+echo Supported URLs:
+echo  • Twitter/X: https://x.com/i/status/...
+echo  • YouTube: https://youtube.com/watch?v=...
+echo  • YouTube: https://youtu.be/...
+echo.
+echo To start now, run: !EXE_PATH!
+echo.
+echo Log file location: !STARTUP_DIR!\SystemTrayApp_Debug.log
+echo.
+
+choice /C YN /M "Would you like to start the application now"
+if !errorlevel! equ 1 (
+    echo.
+    echo Starting SystemTrayApp...
+    start "" "!EXE_PATH!"
+    echo.
+    echo Application started! Check your system tray.
+) else (
+    echo.
+    echo You can start it manually or it will start on next login.
+)
+
+echo.
+echo Press any key to exit installer...
+pause >nul
+

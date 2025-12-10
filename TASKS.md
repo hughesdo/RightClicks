@@ -22,20 +22,17 @@
   - Jobs sent to running instance via IPC
 
 ### 🚧 **In Progress:**
-- **Phase 5: Additional Features** - Identifying easy-win features to implement next
+- **Phase 5: Additional Features** - Video Downloader Integration (clipboard monitoring + auto-download)
 
 ### ⏳ **Not Started:**
-- **Phase 3: API Config Tab** - OpenAI API key configuration UI (needed for TranscribeMp3)
 - **Phase 3: Clipboard Tab** - Features from TransformClipboard project
-- **Phase 5: More Features** - ReverseVideo, Forward2Reverse, TimeStretch, TranscribeMp3, Image conversions
-- **Phase 7: Polish & Testing** - Update checker, FFmpeg bundling, comprehensive testing
+- **Phase 5: More Features** - Image conversions, additional video processing
+- **Phase 7: Polish & Testing** - Update checker, comprehensive testing
 
 ### 🎯 **Next Immediate Steps:**
-1. Identify and implement 3-5 easy-win features (simple FFmpeg operations)
-2. Test all features end-to-end via context menu
-3. Implement ReverseVideo feature (simple FFmpeg reverse filter)
-4. Implement Forward2Reverse feature (concatenate original + reversed)
-5. Consider image conversion features (JPG ↔ PNG, WebP)
+1. **Video Downloader Integration** — Clipboard monitoring + auto-download from YouTube, X, etc.
+2. Implement remaining image conversion features
+3. Complete Phase 7 polish tasks
 
 ---
 
@@ -329,18 +326,6 @@
 ### 🎯 Potential Future Features
 *Additional features that could be implemented*
 
-#### Video Features (.mp4, .avi, .mkv, .mov, .webm)
-
-- [ ] **RotateVideoFeature** - Rotate video 90°/180°/270°
-  - FFmpeg command: `ffmpeg -i input.mp4 -vf "transpose=1" output.mp4`
-  - Output: `{basename}_Rotate90.mp4` (or 180, 270)
-  - Complexity: LOW (single FFmpeg filter)
-  - UI: Could add submenu for rotation angles
-
-- [ ] **MuteVideoFeature** - Remove audio track entirely
-  - FFmpeg command: `ffmpeg -i input.mp4 -an -c:v copy output.mp4`
-  - Output: `{basename}_Muted.mp4`
-  - Complexity: LOW (stream copy, no re-encoding)
 
 #### Image Features (.jpg, .png, .bmp, .webp)
 - [ ] **ImageToWebPFeature** - Convert any image to WebP
@@ -356,13 +341,55 @@
 
 
 
+### 🎬 Video Downloader Integration (NEW!)
+*Clipboard monitoring with auto-download from video platforms*
+
+**Reference folder:** `\OldApps\Video Downloader` (legacy apps for reference only — will be deleted once absorbed)
+
+- [ ] **Phase 1: Core Infrastructure**
+  - [ ] Move `yt-dlp.exe` from `\OldApps\Video Downloader\bin\Release\` to RightClicks proper
+  - [ ] Update `install.bat` to include `yt-dlp.exe` in deployment
+  - [ ] Create `VideoDownloaderService.cs` for download management
+  - [ ] Create `ClipboardMonitorService.cs` for clipboard watching
+
+- [ ] **Phase 2: Clipboard Monitoring**
+  - [ ] Implement clipboard change detection (poll or hook-based)
+  - [ ] Parse clipboard text for supported video URLs
+  - [ ] Trigger download via `yt-dlp.exe` when URL detected
+  - [ ] Handle duplicate URL detection (don't re-download same URL)
+
+- [ ] **Phase 3: Platform Support & Regex**
+  - [ ] Research current `yt-dlp.exe` supported platforms
+  - [ ] Implement regex patterns for each platform:
+    - [ ] YouTube (youtube.com, youtu.be)
+    - [ ] X/Twitter (x.com, twitter.com)
+    - [ ] (Additional platforms TBD based on yt-dlp support)
+  - [ ] Tie each platform to enable/disable checkbox in UI
+
+- [ ] **Phase 4: Download Management**
+  - [ ] Download destination: `%USERPROFILE%\Videos`
+  - [ ] Subfolder format: `YYYY-MM-DD_Source` (e.g., `2025-12-05_X`, `2025-11-03_Youtube`)
+  - [ ] Replace legacy "Memes" prefix with actual source name
+  - [ ] Handle download progress tracking
+  - [ ] Handle download errors gracefully
+
+- [ ] **Phase 5: Configuration UI**
+  - [ ] Add new tab: "Automated Jobs" in RightClicks Config UI
+  - [ ] Add collapsible "Video Download" section (like Video Files, Audio Files sections)
+  - [ ] For each supported platform:
+    - [ ] Show checkbox (enabled by default)
+    - [ ] Checkbox controls whether URLs from that source auto-download
+  - [ ] Save platform preferences to `config.json`
+
+- [ ] **Phase 6: Testing & Polish**
+  - [ ] Test YouTube URL detection and download
+  - [ ] Test X/Twitter URL detection and download
+  - [ ] Test subfolder creation with correct date and source
+  - [ ] Test enable/disable toggles per platform
+  - [ ] Clean up `\OldApps\` folder after functionality absorbed
+
 ### 🔮 Advanced Features (Later)
 *More complex features requiring dialogs or API integration*
-
-- [ ] **TimeStretchFeature** - Stretch/compress video duration
-  - Requires dialog for duration input
-  - FFmpeg: setpts filter for video, atempo for audio
-  - Complexity: HIGH (dialog + complex FFmpeg filters)
 
 - [ ] **TranscribeMp3Feature** - Transcribe MP3 to text
   - Requires OpenAI API integration
@@ -450,13 +477,7 @@
 - [ ] Image conversion features (JPG ↔ PNG, WebP)
 - [ ] Text file features (clipboard integration)
 - [ ] GLSL shader conversion features
-- [ ] Plugin architecture for external features
-- [ ] MSI/MSIX installer
-- [ ] Automatic delta updates with Squirrel.Windows
-- [ ] Localization (multiple languages)
-- [ ] Dark mode theme
-- [ ] Custom output folder configuration
-- [ ] Batch processing (multiple files at once)
+
 
 ---
 

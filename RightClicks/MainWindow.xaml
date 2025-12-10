@@ -754,7 +754,176 @@
                 </Grid>
             </TabItem>
 
-            <!-- Tab 4: Queued Jobs -->
+            <!-- Tab 4: Automated Jobs -->
+            <TabItem Header="Automated Jobs" x:Name="AutomatedJobsTab">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="20">
+
+                        <!-- Header -->
+                        <TextBlock Text="Automated Jobs"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource TextBrush}"
+                                   Margin="0,0,0,10"/>
+
+                        <TextBlock TextWrapping="Wrap"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Margin="0,0,0,20">
+                            <Run Text="Configure background automation features that run continuously while RightClicks is active."/>
+                        </TextBlock>
+
+                        <!-- Video Download Section -->
+                        <Expander x:Name="VideoDownloadExpander" IsExpanded="True" Margin="0,0,0,15">
+                            <Expander.Header>
+                                <Border Background="{StaticResource CardBrush}"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="15">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="📥 Video Auto-Download"
+                                                       FontSize="14"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextBrush}"/>
+                                            <TextBlock Text="Automatically download videos when URLs are copied to clipboard"
+                                                       FontSize="11"
+                                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                                       Margin="0,4,0,0"/>
+                                        </StackPanel>
+                                        <CheckBox Grid.Column="1"
+                                                  x:Name="VideoDownloadEnabledCheckBox"
+                                                  IsChecked="True"
+                                                  VerticalAlignment="Center"
+                                                  Margin="15,0,0,0"
+                                                  Checked="VideoDownloadEnabledCheckBox_Changed"
+                                                  Unchecked="VideoDownloadEnabledCheckBox_Changed"/>
+                                    </Grid>
+                                </Border>
+                            </Expander.Header>
+
+                            <Border Background="{StaticResource BackgroundBrush}"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1,0,1,1"
+                                    CornerRadius="0,0,4,4"
+                                    Padding="15">
+                                <StackPanel>
+
+                                    <!-- Download Path -->
+                                    <TextBlock Text="Download Folder:"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrush}"
+                                               Margin="0,0,0,5"/>
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="VideoDownloadPathTextBox"
+                                                 Grid.Column="0"
+                                                 Text="%USERPROFILE%\Videos"
+                                                 Padding="8"
+                                                 TextChanged="VideoDownloadPathTextBox_TextChanged"/>
+                                        <Button Grid.Column="1"
+                                                Content="📁 Browse"
+                                                Padding="10,8"
+                                                Margin="8,0,0,0"
+                                                Click="BrowseVideoDownloadPath_Click"/>
+                                    </Grid>
+
+                                    <TextBlock Text="Videos will be saved to: [DownloadFolder]\YYYY-MM-DD_Platform\"
+                                               FontSize="11"
+                                               Foreground="{StaticResource SecondaryTextBrush}"
+                                               Margin="0,0,0,20"/>
+
+                                    <!-- Platform Toggles -->
+                                    <TextBlock Text="Enabled Platforms:"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrush}"
+                                               Margin="0,0,0,10"/>
+
+                                    <Border Background="{StaticResource CardBrush}"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="4"
+                                            Padding="15"
+                                            Margin="0,0,0,15">
+                                        <ItemsControl x:Name="PlatformTogglesControl">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{StaticResource BackgroundBrush}"
+                                                            BorderBrush="{StaticResource BorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="4"
+                                                            Padding="10,8"
+                                                            Margin="0,0,10,10">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                                                                      VerticalAlignment="Center"
+                                                                      Checked="PlatformToggle_Changed"
+                                                                      Unchecked="PlatformToggle_Changed"/>
+                                                            <TextBlock Text="{Binding PlatformName}"
+                                                                       FontSize="13"
+                                                                       Foreground="{StaticResource TextBrush}"
+                                                                       VerticalAlignment="Center"
+                                                                       Margin="8,0,0,0"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Border>
+
+                                    <!-- Info Box -->
+                                    <Border Background="#E6F3FF"
+                                            BorderBrush="#B3D9FF"
+                                            BorderThickness="1"
+                                            CornerRadius="4"
+                                            Padding="15">
+                                        <StackPanel>
+                                            <TextBlock Text="ℹ️ How it works"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextBrush}"
+                                                       Margin="0,0,0,8"/>
+                                            <TextBlock TextWrapping="Wrap"
+                                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                                       LineHeight="20">
+                                                <Run Text="1. Copy a video URL to your clipboard (e.g., from YouTube, X, TikTok)"/>
+                                                <LineBreak/>
+                                                <Run Text="2. RightClicks detects the URL and starts downloading automatically"/>
+                                                <LineBreak/>
+                                                <Run Text="3. Video is saved to the download folder, organized by date and platform"/>
+                                                <LineBreak/>
+                                                <Run Text="4. A notification appears when the download completes"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+
+                                </StackPanel>
+                            </Border>
+                        </Expander>
+
+                        <!-- Save Button -->
+                        <Button Content="Save Automated Jobs Configuration"
+                                x:Name="SaveAutomatedJobsButton"
+                                HorizontalAlignment="Right"
+                                Margin="0,20,0,0"
+                                Click="SaveAutomatedJobsButton_Click"/>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Tab 5: Queued Jobs -->
             <TabItem Header="Queued Jobs" x:Name="QueuedJobsTab">
                 <Grid Margin="20">
                     <Grid.RowDefinitions>

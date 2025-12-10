@@ -27,16 +27,37 @@ RightClicks is a modern Windows context menu extension system that provides file
 - Modern C# features while maintaining practical development velocity
 - Strong tooling support in both VS Code and Visual Studio 2022
 
-### Shell Hook Manager (Separate Component)
-- **Framework:** .NET Framework 4.8
+### Shell Extension (Context Menu DLL)
+- **Project:** `RightClicksShellExtension`
+- **Framework:** .NET Framework 4.8 (REQUIRED - cannot be changed)
 - **Shell Integration:** SharpShell
-- **Purpose:** Standalone program for registering/unregistering context menu hooks
+- **Purpose:** COM server DLL loaded directly into Windows Explorer to provide context menus
 
 **Rationale:**
+- Windows Explorer is a native 64-bit process that can ONLY load .NET Framework assemblies
 - SharpShell requires .NET Framework (not compatible with .NET 8)
+- This is a Windows limitation that cannot be changed - .NET 8 DLLs cannot run inside Explorer.exe
+- Must be built as x64 to match Explorer's architecture
+
+### Shell Hook Manager (Installation Tool)
+- **Project:** `RightClicksShellInstaller`
+- **Framework:** .NET 8.0
+- **Purpose:** Standalone CLI tool for registering/unregistering shell extension
+
+**Rationale:**
+- Uses SharpShell's `ServerRegistrationManager` to register the shell extension DLL
+- Can be modern .NET 8 because it runs as a separate process, not inside Explorer
 - Isolates shell registration complexity from main application
-- Proven, stable solution for Windows shell extensions
-- Can be replaced later without affecting main application
+
+### ⚠️ CRITICAL: DLL Version Conflict
+
+Both RightClicks (.NET 8) and RightClicksShellExtension (.NET 4.8) use `Newtonsoft.Json`:
+- .NET 8's version references `System.Runtime, Version=6.0.0.0`
+- .NET Framework 4.8 does NOT have this assembly - it causes load failure
+
+**Build Requirement:** The shell extension's `Newtonsoft.Json.dll` MUST be copied AFTER the main app's files to overwrite the incompatible .NET 8 version. See `RightClicks.csproj` post-build target.
+
+**Symptom of Wrong DLL:** Context menus show only "Open RightClicks..." instead of cascading feature menus.
 
 ### Hybrid Architecture Benefits
 - ✅ 95% of codebase uses modern .NET 8
@@ -44,6 +65,7 @@ RightClicks is a modern Windows context menu extension system that provides file
 - ✅ Clean separation between shell integration and business logic
 - ✅ Easy to maintain and test independently
 - ✅ Future-proof: shell layer can be modernized without rewriting main app
+- ⚠️ Requires careful build configuration to avoid DLL version conflicts
 
 ### Development Environment
 - **Primary IDE:** Visual Studio Code (daily development)

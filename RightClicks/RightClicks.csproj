@@ -57,7 +57,38 @@
     </None>
   </ItemGroup>
 
-  <!-- Post-build: Copy files to %LOCALAPPDATA%\RightClicks for testing shell extension -->
+  <!-- Include yt-dlp.exe for video downloading -->
+  <ItemGroup>
+    <None Include="bin\yt-dlp.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>bin\yt-dlp.exe</Link>
+    </None>
+  </ItemGroup>
+
+  <!--
+    Post-build: Copy files to %LOCALAPPDATA%\RightClicks for testing shell extension
+
+    ⚠️ CRITICAL: .NET VERSION CONFLICT - READ BEFORE MODIFYING ⚠️
+
+    This application uses a HYBRID .NET architecture:
+    - RightClicks (this project): .NET 8.0
+    - RightClicksShellExtension: .NET Framework 4.8 (loaded by Windows Explorer)
+    - RightClicksShellInstaller: .NET 8.0
+
+    The shell extension MUST be .NET Framework 4.8 because Windows Explorer is a native
+    64-bit process that can only host .NET Framework assemblies (not .NET 8).
+
+    COPY ORDER IS CRITICAL:
+    1. First: Copy main app files (including .NET 8 Newtonsoft.Json)
+    2. THEN: Copy shell extension files (overwrites with .NET Framework Newtonsoft.Json)
+
+    If the .NET 8 Newtonsoft.Json.dll ends up in the install folder, the shell extension
+    will fail with: "Could not load file or assembly 'System.Runtime, Version=6.0.0.0'"
+
+    Symptom: Right-clicking shows only "Open RightClicks..." instead of cascading menus.
+
+    See CLAUDE.md "⚠️ CRITICAL: .NET Version Compatibility" section for full details.
+  -->
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <PropertyGroup>
       <LocalAppData>$(LOCALAPPDATA)</LocalAppData>
@@ -72,20 +103,24 @@
     <!-- Create directory if it doesn't exist -->
     <MakeDir Directories="$(TestInstallDir)" />
 
-    <!-- Copy main executable and dependencies -->
+    <!-- STEP 1: Copy main executable and dependencies (includes .NET 8 Newtonsoft.Json) -->
     <ItemGroup>
       <FilesToCopy Include="$(OutDir)**\*.*" Exclude="$(OutDir)**\*.pdb" />
     </ItemGroup>
     <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(TestInstallDir)\%(RecursiveDir)" SkipUnchangedFiles="true" />
 
-    <!-- Copy shell extension DLL and installer -->
-    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellExtension\bin\Debug\RightClicksShellExtension.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <!-- STEP 2: Copy shell extension files AFTER main app (overwrites .NET 8 DLLs with .NET Framework versions) -->
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellExtension\bin\Release\RightClicksShellExtension.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
     <Copy SourceFiles="$(SolutionRoot)\RightClicksShellExtension\SharpShell.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
-    <!-- Ensure .NET Framework-compatible Newtonsoft.Json is used by the shell extension -->
-    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellExtension\bin\Debug\Newtonsoft.Json.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="false" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
-    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\Debug\net8.0\RightClicksShellManager.exe" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
-    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\Debug\net8.0\RightClicksShellManager.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
-    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\Debug\net8.0\RightClicksShellManager.runtimeconfig.json" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+
+    <!-- ⚠️ CRITICAL: This MUST come AFTER main app copy to overwrite .NET 8 version with .NET Framework version -->
+    <!-- SkipUnchangedFiles="false" forces overwrite even if file sizes match -->
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellExtension\bin\Release\Newtonsoft.Json.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="false" OverwriteReadOnlyFiles="true" ContinueOnError="true" />
+
+    <!-- Copy shell manager (installer tool) -->
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\Release\net8.0\RightClicksShellManager.exe" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\Release\net8.0\RightClicksShellManager.dll" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <Copy SourceFiles="$(SolutionRoot)\RightClicksShellInstaller\bin\Release\net8.0\RightClicksShellManager.runtimeconfig.json" DestinationFolder="$(TestInstallDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
 
     <Message Text="Files copied to $(TestInstallDir)" Importance="high" />
   </Target>

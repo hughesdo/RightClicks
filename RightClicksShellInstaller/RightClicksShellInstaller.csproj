@@ -1,3 +1,16 @@
+<!--
+  RightClicksShellInstaller (RightClicksShellManager.exe)
+
+  This is a .NET 8.0 CLI tool that registers/unregisters the shell extension.
+  It uses SharpShell's ServerRegistrationManager to register RightClicksShellExtension.dll.
+
+  ⚠️ .NET VERSION NOTE:
+  - This installer is .NET 8.0 because it runs as a SEPARATE PROCESS (not inside Explorer)
+  - The shell extension (RightClicksShellExtension) MUST be .NET Framework 4.8 because
+    Windows Explorer can only load .NET Framework assemblies
+
+  See CLAUDE.md "⚠️ CRITICAL: .NET Version Compatibility" section for full details.
+-->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -13,7 +26,8 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Message Text="Copying RightClicksShellExtension.dll to installer output directory..." Importance="high" />
 
-    <Copy SourceFiles="$(SolutionDir)RightClicksShellExtension\bin\Debug\RightClicksShellExtension.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
+    <!-- Copy shell extension files (these are .NET Framework 4.8 assemblies) -->
+    <Copy SourceFiles="$(SolutionDir)RightClicksShellExtension\bin\Release\RightClicksShellExtension.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
     <Copy SourceFiles="$(SolutionDir)RightClicksShellExtension\SharpShell.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
     <Copy SourceFiles="$(SolutionDir)RightClicksShellExtension\Newtonsoft.Json.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" ContinueOnError="true" />
 

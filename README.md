@@ -204,6 +204,37 @@ See **[cloudinary.md](cloudinary.md)** for complete setup instructions.
 
 ---
 
+## Automated Jobs (Coming Soon)
+
+RightClicks is expanding beyond right-click actions to include **background automation** — intelligent agents that monitor and act on your behalf.
+
+### Video Auto-Download (Planned)
+
+**Clipboard monitoring** that automatically downloads videos when you copy a supported URL.
+
+**How it will work:**
+1. Copy a YouTube or X/Twitter video URL to your clipboard
+2. RightClicks detects the URL automatically
+3. Video downloads to `%USERPROFILE%\Videos\YYYY-MM-DD_Source\`
+   - Example: `C:\Users\You\Videos\2025-12-05_YouTube\video.mp4`
+
+**Planned Platform Support:**
+- ✅ YouTube (youtube.com, youtu.be)
+- ✅ X/Twitter (x.com, twitter.com)
+- 🔄 Additional platforms based on yt-dlp support
+
+**Configuration:**
+- New "Automated Jobs" tab in RightClicks settings
+- Enable/disable auto-download per platform
+- All platforms enabled by default
+
+**Technical Details:**
+- Uses `yt-dlp.exe` — the most capable video downloader available
+- Bundled with RightClicks (no separate installation needed)
+- Download folder organized by date and source platform
+
+---
+
 ## The Vision: AI-Augmented Context
 
 This is where it gets interesting.
@@ -269,8 +300,11 @@ The foundation is solid. The architecture is extensible. The vision is ambitious
 **Requirements:**
 - Windows 10/11 (64-bit)
 - .NET 8.0 SDK ([download here](https://dotnet.microsoft.com/download/dotnet/8.0))
+- .NET Framework 4.8 (pre-installed on Windows 10 1903+ and Windows 11) — *Required for shell extension*
 - Administrator privileges (for shell extension installation)
 - Disk space: **~50 MB** (core) or **~10 GB** (with RVC voice conversion)
+
+> **Note:** The shell extension uses .NET Framework 4.8 because Windows Explorer can only load .NET Framework assemblies (not .NET 8). This is a Windows limitation. .NET Framework 4.8 comes pre-installed on modern Windows versions.
 
 **Installation Steps:**
 

@@ -204,6 +204,28 @@ public partial class App : System.Windows.Application
             }
         }
 
+        // Ensure yt-dlp.exe is current before the app becomes available for normal use.
+        // yt-dlp goes stale roughly monthly as sites change; this self-updates it in place.
+        // The check is best-effort: any failure is logged and startup continues with the
+        // existing executable. Skipped in test mode to keep isolated CLI runs fast.
+        if (!_isTestMode)
+        {
+            Log.Information("Running yt-dlp update check...");
+            try
+            {
+                // Run off the UI thread. Blocking the WPF dispatcher with GetResult() while the
+                // service's awaits try to marshal continuations back onto it would deadlock -
+                // Task.Run gives the async work a threadpool context with no dispatcher to capture.
+                Task.Run(async () => await new YtDlpUpdateService().CheckAndUpdateAsync()).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                // CheckAndUpdateAsync already swallows its own errors, but guard here too so a
+                // stray exception can never block startup.
+                Log.Error(ex, "yt-dlp update check threw unexpectedly - continuing startup.");
+            }
+        }
+
         // Initialize system tray icon (Phase 3: UI)
         Log.Information("Initializing system tray icon...");
         InitializeSystemTray();

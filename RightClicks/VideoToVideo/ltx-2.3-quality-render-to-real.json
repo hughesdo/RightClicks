@@ -1,0 +1,79 @@
+{
+  "type_id": "video_to_video",
+  "model_id": "fal-ai/ltx-2.3-quality/render-to-real",
+  "display_name": "LTX 2.3 Quality — Render-to-Real",
+  "description": "Turns a grey 3D blockout / CG render into a photoreal clip. Pairs with the 3DREAL LoRA and enable_detail_refine.",
+  "pricing": "~$0.06/sec (1080p)",
+  "processing_time": "2-6 minutes",
+  "output_type": "video",
+  "supports_loras": true,
+  "input_slots": [
+    {
+      "param": "video_url",
+      "role": "video",
+      "label": "Source Video",
+      "description": "The 3D/CG render to make photoreal.",
+      "required": true,
+      "accept": [".mp4", ".mov", ".webm", ".m4v"]
+    }
+  ],
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Describe the real-world look you want.",
+      "value_type": "string",
+      "required": true,
+      "multiline": true,
+      "rows": 4,
+      "default": ""
+    },
+    "negative_prompt": {
+      "type": "text",
+      "label": "Negative Prompt",
+      "description": "What to avoid.",
+      "value_type": "string",
+      "required": false,
+      "multiline": false,
+      "default": ""
+    },
+    "aspect_ratio": {
+      "type": "dropdown",
+      "label": "Aspect Ratio",
+      "description": "Output aspect ratio. 'auto' keeps the source ratio.",
+      "value_type": "string",
+      "required": false,
+      "options": ["auto", "16:9", "9:16", "1:1", "4:3", "3:4"],
+      "default": "auto"
+    },
+    "enable_detail_refine": {
+      "type": "checkbox",
+      "label": "Detail Refine",
+      "description": "Extra pass to sharpen realism. Recommended for render-to-real.",
+      "value_type": "bool",
+      "required": false,
+      "default": true
+    },
+    "guidance_scale": {
+      "type": "slider",
+      "label": "Guidance Scale",
+      "description": "Prompt adherence. LTX quality is distilled — keep near 1.",
+      "value_type": "number",
+      "required": false,
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "default": 1
+    },
+    "num_inference_steps": {
+      "type": "number",
+      "label": "Inference Steps",
+      "description": "More steps = higher quality, slower.",
+      "value_type": "int",
+      "required": false,
+      "min": 4,
+      "max": 40,
+      "default": 15
+    }
+  }
+}

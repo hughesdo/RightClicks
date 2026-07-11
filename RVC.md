@@ -318,7 +318,9 @@ RightClicks.exe --feature RvcBeavis --file "testfiles\test.mp3" --test-mode
 **Expected Output:**
 - Job added to queue
 - Python process executes
-- Output file created: `test_Beavis.mp3`
+- RVC creates mono WAV/MP3 output
+- FFmpeg post-processes to stereo WAV (lossless PCM)
+- Output file created: `test_Beavis.wav` (stereo PCM 16-bit)
 - Logs show successful completion
 
 ---

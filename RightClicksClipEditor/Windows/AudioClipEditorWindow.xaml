@@ -1,0 +1,182 @@
+<Window x:Class="RightClicksClipEditor.Windows.AudioClipEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:RightClicksClipEditor.Controls"
+        mc:Ignorable="d"
+        Title="Audio Clip Editor"
+        Width="1000" Height="700"
+        MinWidth="800" MinHeight="600"
+        Background="#F5F5F5">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>      <!-- Title/Info bar -->
+            <RowDefinition Height="*" MinHeight="150"/>   <!-- Waveform (resizable) -->
+            <RowDefinition Height="Auto"/>      <!-- GridSplitter -->
+            <RowDefinition Height="Auto"/>      <!-- Transport controls -->
+            <RowDefinition Height="110"/>       <!-- Timeline (fixed) -->
+            <RowDefinition Height="130"/>       <!-- Clip list (fixed) -->
+            <RowDefinition Height="Auto"/>      <!-- Action buttons -->
+        </Grid.RowDefinitions>
+
+        <!-- Title/Info Bar -->
+        <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="15" Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock x:Name="FileNameText" FontSize="16" FontWeight="Bold" Text="Loading..."/>
+                    <TextBlock x:Name="FileInfoText" FontSize="12" Foreground="#666" Margin="0,5,0,0" Text="Analyzing file..."/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="❓ Help" Padding="10,5" Margin="0,0,10,0" Click="HelpButton_Click"
+                            ToolTip="Open help documentation (F1)"/>
+                    <Button Content="⚙️ Settings" Padding="10,5" Click="SettingsButton_Click"
+                            ToolTip="Configure export settings"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Waveform Display -->
+        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="5" Margin="0,0,0,5">
+            <controls:WaveformControl x:Name="Waveform"/>
+        </Border>
+
+        <!-- GridSplitter between Waveform and Transport -->
+        <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch"
+                      Background="#CCCCCC" Cursor="SizeNS" Margin="0,2"/>
+
+        <!-- Transport Controls -->
+        <Border Grid.Row="3" Background="White" CornerRadius="8" Padding="15" Margin="0,5,0,5">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Playback buttons -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,10,0">
+                        <Button Content="◄◄" Width="40" Height="30" Margin="0,0,5,0" Click="StepBackward1s_Click"
+                                ToolTip="Step backward 1 second (Shift+Left)"/>
+                        <Button Content="◄" Width="40" Height="30" Margin="0,0,5,0" Click="StepBackward10ms_Click"
+                                ToolTip="Step backward 10ms (Left arrow)"/>
+                        <Button x:Name="PlayPauseButton" Content="▶" Width="50" Height="30" Margin="0,0,5,0"
+                                Click="PlayPause_Click" FontWeight="Bold" ToolTip="Play/Pause (Spacebar)"/>
+                        <Button Content="►" Width="40" Height="30" Margin="0,0,5,0" Click="StepForward10ms_Click"
+                                ToolTip="Step forward 10ms (Right arrow)"/>
+                        <Button Content="►►" Width="40" Height="30" Click="StepForward1s_Click"
+                                ToolTip="Step forward 1 second (Shift+Right)"/>
+                    </StackPanel>
+
+                    <!-- Position slider -->
+                    <Slider x:Name="PositionSlider" Grid.Column="1" VerticalAlignment="Center"
+                            Minimum="0" Maximum="100" Value="0"
+                            ValueChanged="PositionSlider_ValueChanged"
+                            ToolTip="Seek position"/>
+
+                    <!-- Volume control -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="10,0,0,0">
+                        <TextBlock Text="🔊" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <Slider x:Name="VolumeSlider" Width="100" VerticalAlignment="Center"
+                                Minimum="0" Maximum="1" Value="0.8"
+                                ValueChanged="VolumeSlider_ValueChanged"
+                                ToolTip="Volume"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Position display and Loop checkbox -->
+                <Grid Margin="0,10,0,0">
+                    <TextBlock x:Name="PositionText" HorizontalAlignment="Left"
+                               FontFamily="Consolas" FontSize="14" Text="00:00.000 / 00:00.000"/>
+                    <CheckBox x:Name="LoopCheckBox" Content="Loop Selection (L)" HorizontalAlignment="Right"
+                              VerticalAlignment="Center" Checked="LoopCheckBox_Changed" Unchecked="LoopCheckBox_Changed"
+                              ToolTip="Loop playback between IN and OUT points (L key)"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Timeline -->
+        <Border Grid.Row="4" Background="White" CornerRadius="8" Padding="5" Margin="0,5,0,5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Timeline Control -->
+                <controls:TimelineControl x:Name="Timeline" Grid.Row="0"/>
+
+                <!-- Quick IN/OUT Buttons -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
+                    <Button Content="Set IN (I)" Padding="8,4" Margin="0,0,10,0" Click="SetIn_Click"
+                            ToolTip="Set IN point at current position (I key)"/>
+                    <Button Content="Set OUT (O)" Padding="8,4" Click="SetOut_Click"
+                            ToolTip="Set OUT point at current position (O key)"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Clip List -->
+        <Border Grid.Row="5" Background="White" CornerRadius="8" Padding="15" Margin="0,5,0,5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Clip List" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                <ListBox x:Name="ClipListBox" Grid.Row="1" BorderThickness="1" BorderBrush="#DDD">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled}" Margin="0,0,10,0"/>
+                                <TextBlock Grid.Column="1" Text="{Binding DisplayName}" VerticalAlignment="Center"/>
+                                <Button Grid.Column="2" Content="Remove" Padding="5,2" Click="RemoveClip_Click" Tag="{Binding}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+
+        <!-- Action Buttons -->
+        <Border Grid.Row="6" Background="White" CornerRadius="8" Padding="15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="SelectionText" Grid.Column="0" VerticalAlignment="Center"
+                           FontFamily="Consolas" Text="Selection: Not set"
+                           ToolTip="Current IN/OUT selection - set with I and O keys"/>
+
+                <Button Grid.Column="1" Content="➕ Add Current Selection" Padding="15,8" Margin="0,0,10,0"
+                        Click="AddSelection_Click" FontWeight="Bold"
+                        ToolTip="Add current IN/OUT selection to clip list (Ctrl+A)"/>
+                <Button Grid.Column="2" Content="💾 Save All Clips" Padding="15,8" Margin="0,0,10,0"
+                        Click="SaveAllClips_Click" FontWeight="Bold" Background="#4CAF50" Foreground="White"
+                        ToolTip="Export all enabled clips to files (Ctrl+S)"/>
+                <Button Grid.Column="3" Content="Close" Padding="15,8" Click="Close_Click"
+                        ToolTip="Close editor (Ctrl+W)"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,66 @@
+{
+  "type_id": "swap",
+  "model_id": "fal-ai/pixverse/swap",
+  "display_name": "Pixverse Swap",
+  "description": "Swap a person, object, or background inside the right-clicked video using a reference image. Keeps the original audio.",
+  "pricing": "$0.15-$0.40 / 5s",
+  "processing_time": "1-4 minutes",
+  "output_type": "video",
+  "supports_loras": false,
+  "loras_required": false,
+  "input_slots": [
+    {
+      "param": "video_url",
+      "role": "video",
+      "label": "Source Video",
+      "description": "The right-clicked video whose content gets swapped.",
+      "required": true,
+      "accept": [".mp4", ".mov", ".webm", ".m4v", ".gif"]
+    },
+    {
+      "param": "image_url",
+      "role": "image",
+      "label": "Reference Image",
+      "description": "The person/object/background to swap into the video.",
+      "required": true,
+      "accept": [".jpg", ".jpeg", ".png", ".webp", ".gif"]
+    }
+  ],
+  "parameters": {
+    "keyframe_id": {
+      "type": "number",
+      "label": "Keyframe",
+      "description": "Frame index (1..last) used as the swap keyframe.",
+      "value_type": "int",
+      "required": false,
+      "min": 1,
+      "default": 1
+    },
+    "mode": {
+      "type": "dropdown",
+      "label": "Swap Mode",
+      "description": "What to swap in the video.",
+      "value_type": "string",
+      "required": false,
+      "options": ["person", "object", "background"],
+      "default": "person"
+    },
+    "original_sound_switch": {
+      "type": "checkbox",
+      "label": "Keep original audio",
+      "description": "Preserve the source video's audio track.",
+      "value_type": "bool",
+      "required": false,
+      "default": true
+    },
+    "resolution": {
+      "type": "dropdown",
+      "label": "Resolution",
+      "description": "Output resolution.",
+      "value_type": "string",
+      "required": false,
+      "options": ["360p", "540p", "720p", "1080p"],
+      "default": "720p"
+    }
+  }
+}

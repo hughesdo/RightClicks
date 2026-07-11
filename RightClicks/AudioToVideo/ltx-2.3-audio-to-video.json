@@ -1,0 +1,78 @@
+{
+  "type_id": "audio_to_video",
+  "model_id": "fal-ai/ltx-2.3/audio-to-video",
+  "display_name": "LTX 2.3 — Audio-to-Video",
+  "description": "Base audio-reactive video from an audio clip + first-frame image. No custom LoRA.",
+  "pricing": "~$0.08/sec (1080p)",
+  "processing_time": "2-6 minutes",
+  "output_type": "video",
+  "reattach_audio_from": "audio_url",
+  "supports_loras": false,
+  "input_slots": [
+    {
+      "param": "image_url",
+      "role": "image",
+      "label": "First-Frame Image",
+      "description": "The starting frame the motion grows from.",
+      "required": true,
+      "accept": [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".avif"]
+    },
+    {
+      "param": "audio_url",
+      "role": "audio",
+      "label": "Audio (reactive driver)",
+      "description": "Pre-trim to the hook before submitting. The visuals react to this.",
+      "required": true,
+      "accept": [".wav", ".mp3", ".m4a", ".aac", ".ogg", ".flac"]
+    }
+  ],
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Describe the scene and how it should move.",
+      "value_type": "string",
+      "required": true,
+      "multiline": true,
+      "rows": 4,
+      "default": ""
+    },
+    "negative_prompt": {
+      "type": "text",
+      "label": "Negative Prompt",
+      "value_type": "string",
+      "required": false,
+      "multiline": false,
+      "default": ""
+    },
+    "match_audio_length": {
+      "type": "checkbox",
+      "label": "Match audio length",
+      "value_type": "bool",
+      "required": false,
+      "default": true
+    },
+    "resolution": {
+      "type": "resolution",
+      "label": "Resolution",
+      "required": false,
+      "options": ["1024x1024", "1280x720", "720x1280", "1920x1080", "1080x1920"],
+      "default": "1024x1024"
+    },
+    "frames_per_second": {
+      "type": "dropdown",
+      "label": "FPS",
+      "value_type": "int",
+      "required": false,
+      "options": ["24", "25", "30"],
+      "default": "24"
+    },
+    "generate_audio": {
+      "type": "checkbox",
+      "label": "Generate audio",
+      "value_type": "bool",
+      "required": false,
+      "default": false
+    }
+  }
+}

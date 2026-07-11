@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using FFMpegCore;
 using RightClicks.Models;
 using RightClicks.Services;
 using Serilog;
@@ -153,9 +154,67 @@ public abstract class RvcVoiceConversionFeatureBase : IFileFeature
                 return FeatureResult.CreateFailure(errorMsg, null, duration);
             }
 
-            var successMsg = $"Successfully converted voice to {ModelName}";
-            Log.Information(successMsg);
-            return FeatureResult.CreateSuccess(successMsg, outputPath, duration);
+            Log.Information("RVC output file created: {OutputPath}", outputPath);
+
+            // Post-process: Convert mono to stereo WAV for lossless quality and universal compatibility
+            Log.Information("Post-processing: Converting mono to stereo WAV format...");
+
+            var finalOutputPath = Path.Combine(directory, $"{fileNameWithoutExt}_{ModelName}.wav");
+
+            try
+            {
+                var conversionSuccess = await FFMpegArguments
+                    .FromFileInput(outputPath)
+                    .OutputToFile(finalOutputPath, overwrite: true, options => options
+                        .WithAudioCodec("pcm_s16le")  // 16-bit PCM (standard WAV)
+                        .WithCustomArgument("-ac 2"))  // Force stereo (duplicates mono to L=R)
+                    .CancellableThrough(cancellationToken)
+                    .ProcessAsynchronously();
+
+                if (!conversionSuccess)
+                {
+                    Log.Warning("FFmpeg stereo conversion failed, keeping original mono output");
+                    // Don't fail the whole operation - return the mono file
+                    var successMsg = $"Successfully converted voice to {ModelName} (mono)";
+                    Log.Information(successMsg);
+                    return FeatureResult.CreateSuccess(successMsg, outputPath, (long)(DateTime.Now - startTime).TotalMilliseconds);
+                }
+
+                // Verify stereo output was created
+                if (!File.Exists(finalOutputPath))
+                {
+                    Log.Warning("Stereo output file was not created, keeping original mono output");
+                    var successMsg = $"Successfully converted voice to {ModelName} (mono)";
+                    Log.Information(successMsg);
+                    return FeatureResult.CreateSuccess(successMsg, outputPath, (long)(DateTime.Now - startTime).TotalMilliseconds);
+                }
+
+                // Delete the original mono file
+                try
+                {
+                    File.Delete(outputPath);
+                    Log.Debug("Deleted intermediate mono file: {OutputPath}", outputPath);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Failed to delete intermediate mono file: {OutputPath}", outputPath);
+                    // Non-critical error, continue
+                }
+
+                var finalDuration = (long)(DateTime.Now - startTime).TotalMilliseconds;
+                var finalSuccessMsg = $"Successfully converted voice to {ModelName} (stereo WAV)";
+                Log.Information(finalSuccessMsg);
+                Log.Information("Final output: {FinalOutputPath}", finalOutputPath);
+                return FeatureResult.CreateSuccess(finalSuccessMsg, finalOutputPath, finalDuration);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Post-processing failed, keeping original mono output");
+                // Don't fail the whole operation - return the mono file
+                var successMsg = $"Successfully converted voice to {ModelName} (mono)";
+                Log.Information(successMsg);
+                return FeatureResult.CreateSuccess(successMsg, outputPath, (long)(DateTime.Now - startTime).TotalMilliseconds);
+            }
         }
         catch (Exception ex)
         {

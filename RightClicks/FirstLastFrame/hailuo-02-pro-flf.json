@@ -1,0 +1,50 @@
+{
+  "model_id": "fal-ai/minimax/hailuo-02/pro/image-to-video",
+  "display_name": "MiniMax Hailuo 02 Pro (First+Last Frame)",
+  "description": "MiniMax Hailuo 02 Pro - High quality first+last frame video generation",
+  "pricing": "$0.30/video",
+  "processing_time": "~2-3 minutes",
+  "image_param_names": {
+    "start": "image_url",
+    "end": "last_frame_url"
+  },
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Text prompt describing the video transition",
+      "required": true,
+      "default": "A smooth cinematic transition between the two frames",
+      "multiline": true,
+      "rows": 3,
+      "clear_on_focus": true
+    },
+    "duration": {
+      "type": "dropdown",
+      "label": "Duration",
+      "description": "Video duration in seconds",
+      "required": false,
+      "options": ["5", "6"],
+      "default": "5"
+    },
+    "resolution": {
+      "type": "dropdown",
+      "label": "Resolution",
+      "description": "Output video resolution",
+      "required": false,
+      "options": ["720p", "1080p"],
+      "default": "720p"
+    },
+    "seed": {
+      "type": "number",
+      "label": "Seed",
+      "description": "Random seed for reproducibility (leave empty for random)",
+      "required": false,
+      "default": "Random",
+      "min": 0,
+      "max": 2147483647,
+      "step": 1
+    }
+  }
+}
+

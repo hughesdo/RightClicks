@@ -9,25 +9,29 @@ using System.Threading.Tasks;
 namespace RightClicks.Features.Image
 {
     /// <summary>
-    /// Feature to convert WebP images to JPG format.
-    /// Output file: {original_name}.jpg (next to source file)
+    /// Feature to convert various image formats to WebP.
+    /// Supports: JPG, PNG, AVIF, GIF, BMP, TIFF
+    /// Output file: {original_name}.webp (next to source file)
     /// </summary>
-    public class WebpToJpgFeature : IFileFeature
+    public class ConvertToWebpFeature : IFileFeature
     {
-        public string Id => "WebpToJpg";
+        public string Id => "ConvertToWebp";
 
-        public string DisplayName => "WebP to JPG";
+        public string DisplayName => "Image > Convert to WebP";
 
-        public string Description => "Convert WebP image to JPG format";
+        public string Description => "Convert image to WebP format (modern, smaller)";
 
-        public string[] SupportedExtensions => new[] { ".webp" };
+        public string[] SupportedExtensions => new[] 
+        { 
+            ".jpg", ".jpeg", ".png", ".avif", ".gif", ".bmp", ".tiff", ".tif"
+        };
 
         public bool IsCloudBased => false;
 
         public async Task<FeatureResult> ExecuteAsync(string filePath, CancellationToken cancellationToken)
         {
             var startTime = DateTime.Now;
-            Log.Information("WebpToJpgFeature: Starting execution for file: {FilePath}", filePath);
+            Log.Information("ConvertToWebpFeature: Starting execution for file: {FilePath}", filePath);
 
             try
             {
@@ -42,10 +46,14 @@ namespace RightClicks.Features.Image
                     return FeatureResult.CreateFailure($"File not found: {fullPath}", null, duration);
                 }
 
-                // Calculate output path: {original_name}.jpg
+                // Get input format
+                var inputExt = Path.GetExtension(fullPath).ToLowerInvariant();
+                Log.Information("Input format: {InputFormat}", inputExt);
+
+                // Calculate output path: {original_name}.webp
                 var fileNameWithoutExt = Path.GetFileNameWithoutExtension(fullPath);
                 var directory = Path.GetDirectoryName(fullPath);
-                var outputPath = Path.Combine(directory!, $"{fileNameWithoutExt}.jpg");
+                var outputPath = Path.Combine(directory!, $"{fileNameWithoutExt}.webp");
                 Log.Information("Output path: {OutputPath}", outputPath);
 
                 // Check if output file already exists
@@ -54,14 +62,14 @@ namespace RightClicks.Features.Image
                     Log.Warning("Output file already exists, will overwrite: {OutputPath}", outputPath);
                 }
 
-                // Convert WebP to JPG using FFmpeg
-                Log.Information("Converting WebP to JPG...");
+                // Convert to WebP using FFmpeg
+                Log.Information("Converting {InputFormat} to WebP...", inputExt);
 
                 var success = await FFMpegArguments
                     .FromFileInput(fullPath)
                     .OutputToFile(outputPath, overwrite: true, options => options
-                        .WithVideoCodec("mjpeg")
-                        .ForceFormat("image2"))
+                        .WithVideoCodec("libwebp")
+                        .ForceFormat("webp"))
                     .CancellableThrough(cancellationToken)
                     .ProcessAsynchronously();
 
@@ -84,25 +92,25 @@ namespace RightClicks.Features.Image
                 Log.Information("Output file created: {OutputPath} ({Size} bytes)", outputPath, outputFileInfo.Length);
 
                 var finalDuration = (long)(DateTime.Now - startTime).TotalMilliseconds;
-                Log.Information("WebpToJpgFeature: Completed successfully in {Duration}ms", finalDuration);
+                Log.Information("ConvertToWebpFeature: Completed successfully in {Duration}ms", finalDuration);
 
                 return FeatureResult.CreateSuccess(
-                    $"WebP converted to JPG successfully",
+                    $"Image converted to WebP successfully",
                     outputPath,
                     finalDuration
                 );
             }
             catch (OperationCanceledException)
             {
-                Log.Warning("WebpToJpgFeature: Operation cancelled");
+                Log.Warning("ConvertToWebpFeature: Operation cancelled");
                 var duration = (long)(DateTime.Now - startTime).TotalMilliseconds;
                 return FeatureResult.CreateFailure("Operation cancelled by user", null, duration);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "WebpToJpgFeature: Execution failed");
+                Log.Error(ex, "ConvertToWebpFeature: Execution failed");
                 var duration = (long)(DateTime.Now - startTime).TotalMilliseconds;
-                return FeatureResult.CreateFailure($"Failed to convert WebP to JPG: {ex.Message}", ex, duration);
+                return FeatureResult.CreateFailure($"Failed to convert to WebP: {ex.Message}", ex, duration);
             }
         }
     }

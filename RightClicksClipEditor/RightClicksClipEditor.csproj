@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>RightClicksClipEditor</AssemblyName>
+    <!-- Ensure all dependencies are copied to output -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!-- Enable unsafe code for waveform rendering -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- FFmpeg Integration - MUST match RightClicks project version -->
+    <PackageReference Include="FFMpegCore" Version="5.4.0" />
+
+    <!-- Audio Processing -->
+    <PackageReference Include="NAudio" Version="2.2.1" />
+
+    <!-- Logging -->
+    <PackageReference Include="Serilog" Version="4.3.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+
+    <!-- JSON Serialization - MUST match FFMpegCore dependency -->
+    <PackageReference Include="System.Text.Json" Version="9.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Copy help file to output -->
+    <None Update="Resources\ClipEditorHelp.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Copy to RightClicks output directory -->
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <PropertyGroup>
+      <RightClicksOutputDir>$(ProjectDir)..\RightClicks\bin\$(Configuration)\net8.0-windows\</RightClicksOutputDir>
+    </PropertyGroup>
+
+    <Message Text="Copying ClipEditor to RightClicks output: $(RightClicksOutputDir)" Importance="high" />
+
+    <!-- Copy ALL files from ClipEditor output to RightClicks output -->
+    <ItemGroup>
+      <ClipEditorFiles Include="$(OutDir)**\*.*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(ClipEditorFiles)"
+          DestinationFolder="$(RightClicksOutputDir)%(RecursiveDir)"
+          SkipUnchangedFiles="false"
+          ContinueOnError="true" />
+  </Target>
+
+</Project>

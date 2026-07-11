@@ -86,7 +86,7 @@ public partial class MainWindow : Window
         // Define category detection rules
         var videoExtensions = new[] { ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm" };
         var audioExtensions = new[] { ".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a" };
-        var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp" };
+        var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".avif", ".tiff", ".tif" };
         var textExtensions = new[] { ".txt", ".md", ".glsl", ".frag", ".sql", ".cs", ".js", ".ts",
                                       ".json", ".xml", ".html", ".css", ".py", ".java", ".cpp",
                                       ".c", ".h", ".hpp", ".sh", ".bat", ".ps1", ".yaml", ".yml",

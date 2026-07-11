@@ -1,0 +1,66 @@
+{
+  "model_id": "fal-ai/kling-video/v3/standard/image-to-video",
+  "display_name": "Kling v3 Standard",
+  "description": "Kling v3 (standard tier). Strong motion and prompt adherence, native audio generation, up to 15s.",
+  "pricing": "$0.084/sec audio off, $0.126/sec audio on (~$0.63 for 5s with audio)",
+  "processing_time": "2-5 minutes",
+  "image_parameter": "start_image_url",
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Describe the motion and camera work you want.",
+      "value_type": "string",
+      "required": true,
+      "multiline": true,
+      "rows": 5,
+      "default": ""
+    },
+    "negative_prompt": {
+      "type": "text",
+      "label": "Negative Prompt",
+      "description": "What to avoid in the generation.",
+      "value_type": "string",
+      "required": false,
+      "multiline": false,
+      "default": "blur, distort, and low quality"
+    },
+    "duration": {
+      "type": "dropdown",
+      "label": "Duration (seconds)",
+      "description": "Length of the generated video.",
+      "value_type": "string",
+      "required": false,
+      "options": ["3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"],
+      "default": "5"
+    },
+    "generate_audio": {
+      "type": "checkbox",
+      "label": "Generate audio",
+      "description": "Adds a native soundtrack. Increases cost from $0.084/sec to $0.126/sec.",
+      "value_type": "bool",
+      "required": false,
+      "default": true
+    },
+    "shot_type": {
+      "type": "dropdown",
+      "label": "Shot Type",
+      "description": "'customize' follows your prompt; 'intelligent' lets the model choose the shot.",
+      "value_type": "string",
+      "required": false,
+      "options": ["customize", "intelligent"],
+      "default": "customize"
+    },
+    "cfg_scale": {
+      "type": "slider",
+      "label": "CFG Scale",
+      "description": "How strictly the model follows the prompt. Lower is more creative.",
+      "value_type": "number",
+      "required": false,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "default": 0.5
+    }
+  }
+}

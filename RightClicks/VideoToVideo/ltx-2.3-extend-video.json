@@ -1,0 +1,69 @@
+{
+  "type_id": "video_to_video",
+  "model_id": "fal-ai/ltx-2.3/extend-video",
+  "display_name": "LTX 2.3 — Extend Video",
+  "description": "Adds frames onto an existing clip. Feed the source video (optionally a prompt to steer the new motion); add an End Image to turn the extension into a transition.",
+  "pricing": "~$0.06/sec (1080p)",
+  "processing_time": "1-4 minutes",
+  "output_type": "video",
+  "supports_loras": false,
+  "input_slots": [
+    {
+      "param": "video_url",
+      "role": "video",
+      "label": "Source Video",
+      "description": "The clip to extend. New frames are generated to continue it.",
+      "required": true,
+      "accept": [".mp4", ".mov", ".webm", ".m4v"]
+    },
+    {
+      "param": "end_image_url",
+      "role": "image",
+      "label": "End Image (optional)",
+      "description": "If set, the extension morphs toward this frame, making a transition.",
+      "required": false,
+      "accept": [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".avif"]
+    }
+  ],
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Optional — describe how the clip should continue / move.",
+      "value_type": "string",
+      "required": false,
+      "multiline": true,
+      "rows": 4,
+      "default": ""
+    },
+    "aspect_ratio": {
+      "type": "dropdown",
+      "label": "Aspect Ratio",
+      "description": "Output aspect ratio. 'auto' keeps the source ratio.",
+      "value_type": "string",
+      "required": false,
+      "options": ["auto", "16:9", "9:16", "1:1", "4:3", "3:4"],
+      "default": "auto"
+    },
+    "duration": {
+      "type": "dropdown",
+      "label": "Duration (sec)",
+      "description": "Length of the generated extension.",
+      "value_type": "int",
+      "required": false,
+      "options": ["6", "8", "10"],
+      "default": "6"
+    },
+    "guidance_scale": {
+      "type": "slider",
+      "label": "Guidance Scale",
+      "description": "Prompt adherence. ~9 when steering with an image, ~5 for text-only.",
+      "value_type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "default": 9
+    }
+  }
+}

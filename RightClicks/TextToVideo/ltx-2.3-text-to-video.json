@@ -1,0 +1,78 @@
+{
+  "type_id": "text_to_video",
+  "model_id": "fal-ai/ltx-2.3/text-to-video",
+  "display_name": "LTX 2.3 — Text-to-Video",
+  "description": "Text-to-video from a prompt (base LTX 2.3). Native audio, 1080p+. Prompt pre-filled from the .txt.",
+  "pricing": "$0.06/sec (1080p)",
+  "processing_time": "2-6 minutes",
+  "output_type": "video",
+  "prefill_prompt_from_file": "prompt",
+  "supports_loras": false,
+  "input_slots": [],
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Describe the scene and how it should move. Pre-filled from the right-clicked .txt.",
+      "value_type": "string",
+      "required": true,
+      "multiline": true,
+      "rows": 6,
+      "default": ""
+    },
+    "negative_prompt": {
+      "type": "text",
+      "label": "Negative Prompt",
+      "value_type": "string",
+      "required": false,
+      "multiline": false,
+      "default": ""
+    },
+    "duration": {
+      "type": "dropdown",
+      "label": "Duration (seconds)",
+      "value_type": "int",
+      "required": false,
+      "options": ["6", "8", "10"],
+      "default": "6"
+    },
+    "resolution": {
+      "type": "dropdown",
+      "label": "Resolution",
+      "value_type": "string",
+      "required": false,
+      "options": ["1080p", "1440p", "2160p"],
+      "default": "1080p"
+    },
+    "aspect_ratio": {
+      "type": "dropdown",
+      "label": "Aspect Ratio",
+      "value_type": "string",
+      "required": false,
+      "options": ["16:9", "9:16", "1:1", "4:3", "3:4"],
+      "default": "16:9"
+    },
+    "generate_audio": {
+      "type": "checkbox",
+      "label": "Generate audio",
+      "value_type": "bool",
+      "required": false,
+      "default": true
+    },
+    "enable_prompt_expansion": {
+      "type": "checkbox",
+      "label": "Enable prompt expansion",
+      "value_type": "bool",
+      "required": false,
+      "default": true
+    },
+    "seed": {
+      "type": "number",
+      "label": "Seed (optional)",
+      "description": "Leave blank for random.",
+      "value_type": "int",
+      "required": false,
+      "default": ""
+    }
+  }
+}

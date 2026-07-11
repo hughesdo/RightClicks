@@ -145,9 +145,19 @@ public class FalAiFileStorageService : IDisposable
             ".avi" => "video/x-msvideo",
             ".mkv" => "video/x-matroska",
             ".webm" => "video/webm",
+            ".m4v" => "video/x-m4v",
+            ".gif" => "image/gif",
             ".mp3" => "audio/mpeg",
             ".wav" => "audio/wav",
             ".m4a" => "audio/mp4",
+            ".aac" => "audio/aac",
+            ".ogg" => "audio/ogg",
+            ".flac" => "audio/flac",
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            ".bmp" => "image/bmp",
+            ".avif" => "image/avif",
             _ => "application/octet-stream"
         };
     }

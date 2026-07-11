@@ -1,0 +1,140 @@
+{
+  "type_id": "audio_to_video",
+  "model_id": "fal-ai/ltx-2.3-quality/audio-to-video/lora",
+  "display_name": "LTX 2.3 Quality — Audio-to-Video (LoRA)",
+  "description": "Audio-reactive video from an audio clip + first-frame image, with a selectable LoRA. The one Don uses most for music videos.",
+  "pricing": "~$0.06/sec (1080p)",
+  "processing_time": "2-6 minutes",
+  "output_type": "video",
+  "reattach_audio_from": "audio_url",
+  "supports_loras": true,
+  "loras_required": true,
+  "input_slots": [
+    {
+      "param": "image_url",
+      "role": "image",
+      "label": "First-Frame Image",
+      "description": "The starting frame the motion grows from.",
+      "required": true,
+      "accept": [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".avif"]
+    },
+    {
+      "param": "audio_url",
+      "role": "audio",
+      "label": "Audio (reactive driver)",
+      "description": "Pre-trim to the hook before submitting. The visuals react to this.",
+      "required": true,
+      "accept": [".wav", ".mp3", ".m4a", ".aac", ".ogg", ".flac"]
+    }
+  ],
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Describe the scene and how it should move.",
+      "value_type": "string",
+      "required": true,
+      "multiline": true,
+      "rows": 4,
+      "default": ""
+    },
+    "negative_prompt": {
+      "type": "text",
+      "label": "Negative Prompt",
+      "description": "What to avoid.",
+      "value_type": "string",
+      "required": false,
+      "multiline": false,
+      "default": ""
+    },
+    "match_audio_length": {
+      "type": "checkbox",
+      "label": "Match audio length",
+      "description": "Make the video as long as the audio clip.",
+      "value_type": "bool",
+      "required": false,
+      "default": true
+    },
+    "resolution": {
+      "type": "resolution",
+      "label": "Resolution",
+      "description": "Output width x height.",
+      "required": false,
+      "options": ["1024x1024", "1280x720", "720x1280", "1920x1080", "1080x1920"],
+      "default": "1024x1024"
+    },
+    "frames_per_second": {
+      "type": "dropdown",
+      "label": "FPS",
+      "description": "Frames per second.",
+      "value_type": "int",
+      "required": false,
+      "options": ["24", "25", "30"],
+      "default": "24"
+    },
+    "num_inference_steps": {
+      "type": "number",
+      "label": "Inference Steps",
+      "description": "More steps = higher quality, slower.",
+      "value_type": "int",
+      "required": false,
+      "min": 4,
+      "max": 40,
+      "default": 15
+    },
+    "guidance_scale": {
+      "type": "slider",
+      "label": "Guidance Scale",
+      "description": "Prompt adherence. LTX quality is distilled — keep near 1.",
+      "value_type": "number",
+      "required": false,
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "default": 1
+    },
+    "image_strength": {
+      "type": "slider",
+      "label": "Image Strength",
+      "description": "How strongly the first frame anchors the video. Don's default: 0.62.",
+      "value_type": "number",
+      "required": false,
+      "min": 0,
+      "max": 1,
+      "step": 0.01,
+      "default": 0.62
+    },
+    "generate_audio": {
+      "type": "checkbox",
+      "label": "Generate audio",
+      "description": "Let the model add its own audio track (usually off — you supply the music).",
+      "value_type": "bool",
+      "required": false,
+      "default": false
+    },
+    "enable_prompt_expansion": {
+      "type": "checkbox",
+      "label": "Prompt expansion",
+      "description": "Let the model elaborate your prompt.",
+      "value_type": "bool",
+      "required": false,
+      "default": false
+    },
+    "video_quality": {
+      "type": "dropdown",
+      "label": "Video Quality",
+      "value_type": "string",
+      "required": false,
+      "options": ["high", "medium", "low"],
+      "default": "high"
+    },
+    "video_write_mode": {
+      "type": "dropdown",
+      "label": "Write Mode",
+      "value_type": "string",
+      "required": false,
+      "options": ["balanced", "fast", "quality"],
+      "default": "balanced"
+    }
+  }
+}

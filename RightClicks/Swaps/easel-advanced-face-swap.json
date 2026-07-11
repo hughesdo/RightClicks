@@ -1,0 +1,49 @@
+{
+  "type_id": "swap",
+  "model_id": "easel-ai/advanced-face-swap",
+  "display_name": "Easel Advanced Face Swap",
+  "description": "Higher-quality face swap with gender hint and workflow control. Image-output.",
+  "pricing": "low",
+  "processing_time": "seconds",
+  "output_type": "image",
+  "supports_loras": false,
+  "loras_required": false,
+  "input_slots": [
+    {
+      "param": "target_image",
+      "role": "image",
+      "label": "Target Image",
+      "description": "The image whose face will be replaced (the right-clicked image).",
+      "required": true,
+      "accept": [".jpg", ".jpeg", ".png", ".webp"]
+    },
+    {
+      "param": "face_image_0",
+      "role": "image",
+      "label": "Face Source Image",
+      "description": "The image supplying the face to swap in.",
+      "required": true,
+      "accept": [".jpg", ".jpeg", ".png", ".webp"]
+    }
+  ],
+  "parameters": {
+    "gender_0": {
+      "type": "dropdown",
+      "label": "Gender",
+      "description": "Gender hint for the swapped face.",
+      "value_type": "string",
+      "required": false,
+      "options": ["male", "female", "non-binary"],
+      "default": "male"
+    },
+    "workflow_type": {
+      "type": "dropdown",
+      "label": "Workflow",
+      "description": "Which hair to keep: the source face's hair or the target image's hair.",
+      "value_type": "string",
+      "required": false,
+      "options": ["user_hair", "target_hair"],
+      "default": "target_hair"
+    }
+  }
+}

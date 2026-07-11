@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RightClicks Clip Editor - Help</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2196F3;
+            border-bottom: 3px solid #2196F3;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #4CAF50;
+            margin-top: 30px;
+            border-left: 4px solid #4CAF50;
+            padding-left: 10px;
+        }
+        h3 {
+            color: #666;
+            margin-top: 20px;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .shortcut {
+            display: inline-block;
+            background: #e0e0e0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-weight: bold;
+            margin: 2px;
+        }
+        .workflow-step {
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+            padding: 10px 15px;
+            margin: 10px 0;
+        }
+        .tip {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 10px 15px;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #2196F3;
+            color: white;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .marker {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            margin-right: 5px;
+        }
+        .marker-in { background: #4CAF50; }
+        .marker-out { background: #F44336; }
+        .marker-playhead { background: #2196F3; }
+    </style>
+</head>
+<body>
+    <h1>🎬 RightClicks Clip Editor - User Guide</h1>
+    
+    <div class="section">
+        <h2>📋 Quick Start</h2>
+        <div class="workflow-step">
+            <strong>Step 1:</strong> Play your video and find the start of the clip you want to extract
+        </div>
+        <div class="workflow-step">
+            <strong>Step 2:</strong> Press <span class="shortcut">I</span> to set the IN point (start)
+        </div>
+        <div class="workflow-step">
+            <strong>Step 3:</strong> Continue playing or seek to the end of your clip
+        </div>
+        <div class="workflow-step">
+            <strong>Step 4:</strong> Press <span class="shortcut">O</span> to set the OUT point (end)
+        </div>
+        <div class="workflow-step">
+            <strong>Step 5:</strong> Press <span class="shortcut">Ctrl+A</span> to add the clip to your list
+        </div>
+        <div class="workflow-step">
+            <strong>Step 6:</strong> Repeat steps 1-5 for additional clips
+        </div>
+        <div class="workflow-step">
+            <strong>Step 7:</strong> Press <span class="shortcut">Ctrl+S</span> to export all clips
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>⌨️ Keyboard Shortcuts</h2>
+        <table>
+            <tr>
+                <th>Shortcut</th>
+                <th>Action</th>
+            </tr>
+            <tr>
+                <td><span class="shortcut">Spacebar</span></td>
+                <td>Play / Pause video</td>
+            </tr>
+            <tr>
+                <td><span class="shortcut">I</span></td>
+                <td>Set IN point at current position</td>
+            </tr>
+            <tr>
+                <td><span class="shortcut">O</span></td>
+                <td>Set OUT point at current position</td>
+            </tr>
+            <tr>
+                <td><span class="shortcut">Left Arrow</span></td>
+                <td>Step backward 1 frame</td>
+            </tr>
+            <tr>
+                <td><span class="shortcut">Right Arrow</span></td>
+                <td>Step forward 1 frame</td>
+            </tr>
+            <tr>
+                <td><span class="shortcut">Shift+Left</span></td>
+                <td>Step backward 1 second</td>
+            </tr>
+            <tr>
+                <td><span class="shortcut">Shift+Right</span></td>
+                <td>Step forward 1 second</td>
+            </tr>
+            <tr>
+                <td><span class="shortcut">Ctrl+A</span></td>
+                <td>Add current selection to clip list</td>
+            </tr>
+            <tr>
+                <td><span class="shortcut">Ctrl+S</span></td>
+                <td>Save all clips to files</td>
+            </tr>
+            <tr>
+                <td><span class="shortcut">Ctrl+W</span></td>
+                <td>Close editor window</td>
+            </tr>
+            <tr>
+                <td><span class="shortcut">F1</span></td>
+                <td>Show this help</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>🎯 Timeline Controls</h2>
+        <p>The timeline provides visual feedback and precise control over your clips:</p>
+
+        <h3><span class="marker marker-playhead"></span> Playhead (Blue)</h3>
+        <ul>
+            <li><strong>Shows:</strong> Current playback position</li>
+            <li><strong>Click:</strong> Seek to any position in the video</li>
+            <li><strong>Drag:</strong> Scrub through the video</li>
+        </ul>
+
+        <h3><span class="marker marker-in"></span> IN Marker (Green)</h3>
+        <ul>
+            <li><strong>Shows:</strong> Start point of your clip selection</li>
+            <li><strong>Drag:</strong> Adjust the start point precisely</li>
+            <li><strong>Set:</strong> Press <span class="shortcut">I</span> or click "Set IN" button</li>
+        </ul>
+
+        <h3><span class="marker marker-out"></span> OUT Marker (Red)</h3>
+        <ul>
+            <li><strong>Shows:</strong> End point of your clip selection</li>
+            <li><strong>Drag:</strong> Adjust the end point precisely</li>
+            <li><strong>Set:</strong> Press <span class="shortcut">O</span> or click "Set OUT" button</li>
+        </ul>
+
+        <h3>🔍 Zoom & Navigation</h3>
+        <ul>
+            <li><strong>Zoom In:</strong> <span class="shortcut">Ctrl+Mouse Wheel Up</span> or click <strong>+</strong> button</li>
+            <li><strong>Zoom Out:</strong> <span class="shortcut">Ctrl+Mouse Wheel Down</span> or click <strong>-</strong> button</li>
+            <li><strong>Fit All:</strong> Click <strong>Fit</strong> button to see entire duration</li>
+            <li><strong>Scroll:</strong> <span class="shortcut">Shift+Mouse Wheel</span> to scroll horizontally when zoomed</li>
+        </ul>
+
+        <div class="tip">
+            <strong>💡 Tip:</strong> Zoom in for frame-accurate editing! At high zoom levels, you can see individual frames and make precise cuts.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📁 Output Files</h2>
+        <p>Clips are automatically saved with sequential numbering:</p>
+        <ul>
+            <li><strong>Location:</strong> Same folder as your source video</li>
+            <li><strong>Naming:</strong> <code>originalname_clip_001.mp4</code>, <code>originalname_clip_002.mp4</code>, etc.</li>
+            <li><strong>Format:</strong> Same format as source (MP4, AVI, MKV, etc.)</li>
+            <li><strong>Quality:</strong> Re-encoded for frame accuracy (configurable in Settings)</li>
+        </ul>
+
+        <div class="tip">
+            <strong>💡 Tip:</strong> For faster exports with less quality loss, enable "Stream Copy" mode in Settings. This is keyframe-accurate instead of frame-accurate.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎬 Clip List Management</h2>
+        <ul>
+            <li><strong>Add Clip:</strong> Set IN/OUT points, then press <span class="shortcut">Ctrl+A</span></li>
+            <li><strong>Enable/Disable:</strong> Check/uncheck clips to control which ones are exported</li>
+            <li><strong>Remove Clip:</strong> Click the "Remove" button next to any clip</li>
+            <li><strong>Export All:</strong> Press <span class="shortcut">Ctrl+S</span> to save all enabled clips</li>
+        </ul>
+
+        <div class="warning">
+            <strong>⚠️ Note:</strong> Only clips with checkmarks will be exported when you click "Save All Clips".
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎵 Audio Clips</h2>
+        <p>The Audio Clip Editor works similarly to the Video Clip Editor with these differences:</p>
+        <ul>
+            <li><strong>Waveform Display:</strong> Visual representation of audio amplitude</li>
+            <li><strong>Sample-Accurate:</strong> Precise to the audio sample level</li>
+            <li><strong>Loop Selection:</strong> Press <span class="shortcut">L</span> to loop the selected region</li>
+            <li><strong>Fine Stepping:</strong> <span class="shortcut">Shift+Left/Right</span> steps by 10ms for precise editing</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>❓ Troubleshooting</h2>
+
+        <h3>Video won't load</h3>
+        <ul>
+            <li>Ensure FFmpeg is installed in <code>%LOCALAPPDATA%\RightClicks\bin\</code></li>
+            <li>Check that the video file is not corrupted</li>
+            <li>Try a different video format</li>
+        </ul>
+
+        <h3>Clips export with wrong duration</h3>
+        <ul>
+            <li>Use re-encoding mode (not stream copy) for frame-accurate clips</li>
+            <li>Check that IN point is before OUT point</li>
+            <li>Verify the source video has accurate timestamps</li>
+        </ul>
+
+        <h3>Timeline markers not visible</h3>
+        <ul>
+            <li>Zoom out using <span class="shortcut">Ctrl+Mouse Wheel Down</span> or click "Fit" button</li>
+            <li>Markers may be outside the visible area - scroll with <span class="shortcut">Shift+Mouse Wheel</span></li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>⚙️ Tips & Best Practices</h2>
+        <ul>
+            <li>✅ Use frame stepping (<span class="shortcut">Left/Right</span>) for precise IN/OUT points</li>
+            <li>✅ Zoom in on the timeline for frame-accurate editing</li>
+            <li>✅ Disable clips you don't want to export instead of removing them</li>
+            <li>✅ Use descriptive file names by renaming after export</li>
+            <li>✅ Test with a short clip first to verify quality settings</li>
+            <li>⚠️ Large videos may take time to analyze - be patient on first load</li>
+            <li>⚠️ Re-encoding takes longer but provides frame-accurate cuts</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>📞 Support</h2>
+        <p>For more information about RightClicks, visit the project documentation or check the logs at:</p>
+        <p><code>%LOCALAPPDATA%\RightClicks\logs\ClipEditor-*.log</code></p>
+    </div>
+
+    <footer style="text-align: center; margin-top: 40px; padding: 20px; color: #999;">
+        <p>RightClicks Clip Editor | Version 1.0 | © 2026</p>
+    </footer>
+</body>
+</html>
+

@@ -300,8 +300,11 @@ public class JobQueueService
                 throw new InvalidOperationException($"Feature not found: {job.FeatureId}");
             }
 
-            // Execute the feature
-            var result = await feature.ExecuteAsync(job.FilePath, job.CancellationTokenSource.Token);
+            // Execute the feature. Configurable features already prompted the user before this job
+            // was queued, so hand them the settings that were collected then rather than asking again.
+            var result = feature is IConfigurableFeature configurable
+                ? await configurable.ExecuteAsync(job.FilePath, job.Configuration, job.CancellationTokenSource.Token)
+                : await feature.ExecuteAsync(job.FilePath, job.CancellationTokenSource.Token);
 
             // Check if this is an informational result (e.g., first click in two-click workflow)
             // If so, remove the job from the queue without notification

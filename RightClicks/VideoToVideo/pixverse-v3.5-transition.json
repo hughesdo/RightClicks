@@ -1,0 +1,82 @@
+{
+  "type_id": "video_to_video",
+  "model_id": "fal-ai/pixverse/v3.5/transition",
+  "display_name": "Pixverse v3.5 — Transition",
+  "description": "Morphs between a first frame and a last frame image to create a smooth transition clip. Inputs are two images, output is video.",
+  "pricing": "$0.15-$0.40 / 5s",
+  "processing_time": "1-4 minutes",
+  "output_type": "video",
+  "supports_loras": false,
+  "input_slots": [
+    {
+      "param": "first_image_url",
+      "role": "image",
+      "label": "First Frame",
+      "description": "The image the transition starts on.",
+      "required": true,
+      "accept": [".jpg", ".jpeg", ".png", ".webp"]
+    },
+    {
+      "param": "last_image_url",
+      "role": "image",
+      "label": "Last Frame",
+      "description": "The image the transition ends on.",
+      "required": true,
+      "accept": [".jpg", ".jpeg", ".png", ".webp"]
+    }
+  ],
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Describe how the two frames should morph into each other.",
+      "value_type": "string",
+      "required": true,
+      "multiline": true,
+      "rows": 4,
+      "default": ""
+    },
+    "negative_prompt": {
+      "type": "text",
+      "label": "Negative Prompt",
+      "description": "What to avoid.",
+      "value_type": "string",
+      "required": false,
+      "multiline": false,
+      "default": ""
+    },
+    "aspect_ratio": {
+      "type": "dropdown",
+      "label": "Aspect Ratio",
+      "value_type": "string",
+      "required": false,
+      "options": ["16:9", "9:16", "1:1", "4:3", "3:4"],
+      "default": "16:9"
+    },
+    "resolution": {
+      "type": "dropdown",
+      "label": "Resolution",
+      "value_type": "string",
+      "required": false,
+      "options": ["360p", "540p", "720p", "1080p"],
+      "default": "720p"
+    },
+    "duration": {
+      "type": "dropdown",
+      "label": "Duration (sec)",
+      "value_type": "int",
+      "required": false,
+      "options": ["5", "8"],
+      "default": "5"
+    },
+    "style": {
+      "type": "dropdown",
+      "label": "Style",
+      "description": "Optional stylization.",
+      "value_type": "string",
+      "required": false,
+      "options": ["None", "anime", "3d_animation", "clay", "comic", "cyberpunk"],
+      "default": "None"
+    }
+  }
+}

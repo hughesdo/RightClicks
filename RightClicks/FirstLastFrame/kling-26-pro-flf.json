@@ -1,0 +1,60 @@
+{
+  "model_id": "fal-ai/kling-video/v2.6/pro/image-to-video",
+  "display_name": "Kling 2.6 Pro (First+Last Frame)",
+  "description": "Kling 2.6 Pro - High quality first to last frame video generation with smooth motion",
+  "pricing": "$0.50/video",
+  "processing_time": "~2-3 minutes",
+  "image_param_names": {
+    "start": "image_url",
+    "end": "tail_image_url"
+  },
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Text prompt describing the video transition",
+      "required": true,
+      "default": "A smooth cinematic transition between the two frames",
+      "multiline": true,
+      "rows": 3,
+      "clear_on_focus": true
+    },
+    "negative_prompt": {
+      "type": "text",
+      "label": "Negative Prompt",
+      "description": "What to avoid in the generation",
+      "required": false,
+      "default": "blur, distort, low quality",
+      "multiline": false,
+      "rows": 1,
+      "clear_on_focus": false
+    },
+    "duration": {
+      "type": "dropdown",
+      "label": "Duration",
+      "description": "Video duration in seconds",
+      "required": false,
+      "options": ["5", "10"],
+      "default": "5"
+    },
+    "aspect_ratio": {
+      "type": "dropdown",
+      "label": "Aspect Ratio",
+      "description": "Video aspect ratio",
+      "required": false,
+      "options": ["16:9", "9:16", "1:1"],
+      "default": "16:9"
+    },
+    "seed": {
+      "type": "number",
+      "label": "Seed",
+      "description": "Random seed for reproducibility (leave empty for random)",
+      "required": false,
+      "default": "Random",
+      "min": 0,
+      "max": 2147483647,
+      "step": 1
+    }
+  }
+}
+

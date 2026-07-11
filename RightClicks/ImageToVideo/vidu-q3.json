@@ -1,0 +1,56 @@
+{
+  "model_id": "fal-ai/vidu/q3/image-to-video",
+  "display_name": "Vidu Q3",
+  "description": "Vidu Q3. Cheapest option at low resolutions, good stylised and anime motion. No negative prompt support.",
+  "pricing": "$0.07/sec @360p/540p, ~$0.154/sec @720p/1080p (~$0.77 for 5s @720p)",
+  "processing_time": "1-4 minutes",
+  "image_parameter": "image_url",
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Describe the motion and camera work you want.",
+      "value_type": "string",
+      "required": true,
+      "multiline": true,
+      "rows": 5,
+      "default": ""
+    },
+    "duration": {
+      "type": "number",
+      "label": "Duration (seconds)",
+      "description": "Length of the generated video.",
+      "value_type": "int",
+      "required": false,
+      "min": 1,
+      "max": 15,
+      "default": 5
+    },
+    "resolution": {
+      "type": "dropdown",
+      "label": "Resolution",
+      "description": "360p and 540p are billed at the cheap rate; 720p and 1080p cost 2.2x.",
+      "value_type": "string",
+      "required": false,
+      "options": ["360p", "540p", "720p", "1080p"],
+      "default": "720p"
+    },
+    "audio": {
+      "type": "checkbox",
+      "label": "Generate audio",
+      "description": "Adds a native soundtrack.",
+      "value_type": "bool",
+      "required": false,
+      "default": true
+    },
+    "seed": {
+      "type": "number",
+      "label": "Seed (optional)",
+      "description": "Leave blank for random. Reuse a seed to reproduce a previous result.",
+      "value_type": "int",
+      "required": false,
+      "min": 0,
+      "max": 2147483647
+    }
+  }
+}

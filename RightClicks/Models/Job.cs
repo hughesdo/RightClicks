@@ -75,6 +75,12 @@ public class Job
     public bool SuppressNotification { get; set; }
 
     /// <summary>
+    /// Settings collected from the user before this job was queued, for features implementing
+    /// <see cref="IConfigurableFeature"/>. Null for features that need no configuration.
+    /// </summary>
+    public object? Configuration { get; set; }
+
+    /// <summary>
     /// Duration of job execution in milliseconds.
     /// </summary>
     public long DurationMs

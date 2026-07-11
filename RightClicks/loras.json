@@ -1,0 +1,45 @@
+{
+  "loras": [
+    {
+      "name": "fal Audio-Reactive (v1)",
+      "url": "https://huggingface.co/fal/ltx2.3-audio-reactive-lora/resolve/main/ltx2.3_audio_reactive_lora.safetensors",
+      "use_hint": "Abstract art / geometry dancing to music, beat-locked motion.",
+      "default_scale": 1.2,
+      "default_transformer": "both",
+      "compatible_endpoints": [
+        "fal-ai/ltx-2.3-quality/audio-to-video/lora"
+      ]
+    },
+    {
+      "name": "fal Audio-Reactive (v2)",
+      "url": "https://huggingface.co/fal/ltx2.3-audio-reactive-lora/resolve/main/ltx2.3_audio_reactive_lora_v2.safetensors",
+      "use_hint": "Same family, alternate weights. Try if v1 drifts.",
+      "default_scale": 1.2,
+      "default_transformer": "both",
+      "compatible_endpoints": [
+        "fal-ai/ltx-2.3-quality/audio-to-video/lora"
+      ]
+    },
+    {
+      "name": "100percentrobot Audio-Reactive",
+      "url": "https://huggingface.co/100percentrobot/LTX-2.3-Audio-Reactive-LORA/resolve/main/LTX-2.3-Audio-Reactive-LORA.safetensors",
+      "use_hint": "Phased-morph clips (subject -> evolve -> morph -> chaos). Scale 1.4+, best at 10-20s.",
+      "default_scale": 1.4,
+      "default_transformer": "both",
+      "compatible_endpoints": [
+        "fal-ai/ltx-2.3-quality/audio-to-video/lora"
+      ]
+    },
+    {
+      "name": "fal 3DREAL Strong v2",
+      "url": "https://huggingface.co/fal/LTX-2.3-3DREAL-LoRA/resolve/main/3DREAL-strong-v2.safetensors",
+      "use_hint": "3D/CG/game render -> photoreal, holds composition. Use with render-to-real / reference-video-to-video, NOT audio-to-video.",
+      "default_scale": 1.2,
+      "default_transformer": "both",
+      "compatible_endpoints": [
+        "fal-ai/ltx-2.3-quality/render-to-real",
+        "fal-ai/ltx-2.3-quality/reference-video-to-video/lora"
+      ]
+    }
+  ]
+}

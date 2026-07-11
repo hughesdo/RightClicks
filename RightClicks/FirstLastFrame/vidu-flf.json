@@ -1,0 +1,42 @@
+{
+  "model_id": "fal-ai/vidu/start-end-to-video",
+  "display_name": "Vidu (Start-End)",
+  "description": "Vidu Start-End to Video - Generate smooth transition video between start and end frames",
+  "pricing": "$0.40/4s video",
+  "processing_time": "~2-3 minutes",
+  "image_param_names": {
+    "start": "start_image_url",
+    "end": "end_image_url"
+  },
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Text prompt for video generation (max 1500 characters)",
+      "required": true,
+      "default": "Transform smoothly between the two images",
+      "multiline": true,
+      "rows": 3,
+      "clear_on_focus": true
+    },
+    "movement_amplitude": {
+      "type": "dropdown",
+      "label": "Movement Amplitude",
+      "description": "The movement amplitude of objects in the frame",
+      "required": false,
+      "options": ["auto", "small", "medium", "large"],
+      "default": "auto"
+    },
+    "seed": {
+      "type": "number",
+      "label": "Seed",
+      "description": "Random seed for reproducibility (leave empty for random)",
+      "required": false,
+      "default": "Random",
+      "min": 0,
+      "max": 2147483647,
+      "step": 1
+    }
+  }
+}
+

@@ -77,10 +77,21 @@ public class FirstLastFrameApiService : IDisposable
     /// Generates a video from first and last frame images using fal.ai API.
     /// Uses Cloudinary for image hosting (same pattern as lip sync features).
     /// </summary>
+    /// <param name="firstImagePath">Path to the first frame image.</param>
+    /// <param name="lastImagePath">Path to the last frame image.</param>
+    /// <param name="parameters">Additional API parameters.</param>
+    /// <param name="startImageParamName">API parameter name for the start image URL (e.g., "start_image_url", "image_url", "first_frame_url").</param>
+    /// <param name="endImageParamName">API parameter name for the end image URL (e.g., "end_image_url", "tail_image_url", "last_frame_url").</param>
+    /// <param name="cloudinaryCloudName">Cloudinary cloud name.</param>
+    /// <param name="cloudinaryApiKey">Cloudinary API key.</param>
+    /// <param name="cloudinaryApiSecret">Cloudinary API secret.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     public async Task<FirstLastFrameResult> GenerateVideoAsync(
         string firstImagePath,
         string lastImagePath,
         Dictionary<string, object> parameters,
+        string startImageParamName,
+        string endImageParamName,
         string? cloudinaryCloudName,
         string? cloudinaryApiKey,
         string? cloudinaryApiSecret,
@@ -132,22 +143,13 @@ public class FirstLastFrameApiService : IDisposable
             throw new InvalidOperationException($"Failed to upload images to Cloudinary: {ex.Message}", ex);
         }
 
-        // Build request payload
-        // Note: veo3.1 uses "first_frame_url" and "last_frame_url"
-        // wan-flf2v uses "start_image_url" and "end_image_url"
-        // We'll detect based on endpoint
+        // Build request payload using the parameter names from config
         var requestPayload = new Dictionary<string, object>(parameters);
+        requestPayload[startImageParamName] = firstImageUrl!;
+        requestPayload[endImageParamName] = lastImageUrl!;
 
-        if (_endpoint.Contains("veo3.1"))
-        {
-            requestPayload["first_frame_url"] = firstImageUrl!;
-            requestPayload["last_frame_url"] = lastImageUrl!;
-        }
-        else
-        {
-            requestPayload["start_image_url"] = firstImageUrl!;
-            requestPayload["end_image_url"] = lastImageUrl!;
-        }
+        Log.Information("Using image parameter names: start={StartParam}, end={EndParam}",
+            startImageParamName, endImageParamName);
 
         var json = JsonSerializer.Serialize(requestPayload, new JsonSerializerOptions
         {

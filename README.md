@@ -29,14 +29,17 @@ Small shortcuts compound into massive time savings:
 **🚧 Active Development** — Core functionality working, expanding feature set.
 
 RightClicks currently includes:
-- ✅ **59+ working features** (video, audio, image, text operations)
-  - 35 static features (video processing, audio extraction, image manipulation, etc.)
+- ✅ **82+ working features** (video, audio, image, text operations)
+  - 58 static features (video processing, audio extraction, image manipulation, AI generation, etc.)
   - 24+ dynamic RVC voice conversion models (Beavis, Trump, Obama, etc.)
 - ✅ **Windows Explorer integration** (right-click context menu with cascading submenus)
 - ✅ **Background job queue** with configurable concurrency and cancellation support
 - ✅ **System tray application** with configuration UI and job monitoring
 - ✅ **Windows notifications with sound** for job completion
-- ✅ **Cloud-based AI features** (fal.ai integration with 5 lip sync models)
+- ✅ **Cloud-based AI features** (fal.ai integration: lip sync + AI video generation)
+  - **Image-to-Video** and four new generative categories: **Audio-to-Video** (audio-reactive
+    LTX with selectable LoRAs), **Video-to-Video** (extend / retake / render-to-real / transition),
+    **Swaps** (Pixverse video swap + image face swaps), and **Text-to-Video** (LTX / Veo / Seedance)
 - ✅ **Local AI transcription** (Whisper.net with 6 models, GPU-accelerated)
 - ✅ **Local AI voice conversion** (RVC with 24+ voice models)
 - ✅ **Karaoke subtitle rendering** (9 features: 3 styles × 3 quality tiers)
@@ -76,7 +79,8 @@ See **[TASKS.md](TASKS.md)** for detailed development progress and roadmap.
 - ✅ **Local processing** — No internet required, runs on your machine
 - ✅ **Python-based** — Uses RVC inference engine with pre-trained models
 - ✅ **Supports audio files** — MP3, WAV formats
-- ✅ **Output:** `{filename}_{ModelName}.{extension}` next to source file
+- ✅ **Output:** `{filename}_{ModelName}.wav` (stereo PCM) next to source file
+- ✅ **Post-processing** — Automatically converts mono RVC output to stereo WAV (lossless)
 
 **How to use:** Right-click any audio file → **RVC ▶** → Select voice model
 
@@ -144,13 +148,32 @@ RightClicks supports **cloud-based AI features** that leverage external APIs for
 
 ### Currently Supported APIs
 
-**fal.ai** — AI-powered video and image processing
+**fal.ai** — AI-powered video and image generation/processing
+
 - ✅ **Lip Sync (5 models)** — Sync video with audio using AI
   - Kling ($0.17/min) — Most affordable
   - Pixverse ($0.20/min) — Budget option
   - VEED ($0.40/min) — Standard quality
   - Sync v1.9 ($0.70/min) — High quality
   - Creatify ($1.00/min) — Premium quality
+
+- ✅ **AI Video Generation** — a JSON-driven engine that turns a right-click into a fal.ai model
+  call. Each category opens a config window with a model dropdown and per-model parameters; the
+  right-clicked file pre-fills its input slot. Model prices show in the menu (e.g. `☁️ LTX 2.3
+  Quality (LoRA) ~$0.06/s`). Video output is auto-versioned and re-encoded X-safe (AAC 48 kHz,
+  faststart) so clips drop straight into an editor or upload cleanly.
+  - **Image-to-Video** — right-click an image → Kling v3, Seedance, Veo, Vidu, Wan.
+  - **Audio-to-Video** — right-click an image **or** audio clip → audio-reactive LTX 2.3 with
+    selectable HuggingFace **LoRAs**; the source song is muxed back onto the result.
+  - **Video-to-Video** — right-click a video → LTX extend / retake / reference-LoRA / render-to-real,
+    plus Pixverse transition.
+  - **Swaps** — right-click a video → Pixverse person/object/background swap (video out); right-click
+    an image → face swaps (image out).
+  - **Text-to-Video** — right-click a `.txt` prompt file → LTX 2.3 / Fast / Quality, Veo 3.1, Seedance 2.0.
+
+  > **Music-video oriented:** these categories were built around assembling short generative clips
+  > for music videos. Model definitions and LoRA presets live in JSON, so new endpoints can be added
+  > without code changes. See **[TYPE_EXPANSION_TASKS.md](TYPE_EXPANSION_TASKS.md)**.
 
 ### Setup Instructions
 
@@ -290,6 +313,7 @@ The foundation is solid. The architecture is extensible. The vision is ambitious
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** — Technical decisions and implementation details
 - **[RightClicks.md](RightClicks.md)** — Feature specifications and exact behaviors
 - **[cloudinary.md](cloudinary.md)** — Cloudinary setup and configuration for API-based features
+- **[TYPE_EXPANSION_TASKS.md](TYPE_EXPANSION_TASKS.md)** — fal.ai AI-video-generation categories: design, model registry, and status
 
 ---
 

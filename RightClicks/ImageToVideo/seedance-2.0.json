@@ -1,0 +1,64 @@
+{
+  "model_id": "bytedance/seedance-2.0/image-to-video",
+  "display_name": "Seedance 2.0",
+  "description": "ByteDance Seedance 2.0. Excellent realism and character consistency, native audio, up to 4k. Premium pricing.",
+  "pricing": "$0.3034/sec @720p, $0.682/sec @1080p (~$1.52 for 5s @720p)",
+  "processing_time": "2-6 minutes",
+  "image_parameter": "image_url",
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Describe the motion and camera work you want.",
+      "value_type": "string",
+      "required": true,
+      "multiline": true,
+      "rows": 5,
+      "default": ""
+    },
+    "duration": {
+      "type": "dropdown",
+      "label": "Duration (seconds)",
+      "description": "'auto' lets the model pick a length based on your prompt.",
+      "value_type": "string",
+      "required": false,
+      "options": ["auto", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"],
+      "default": "auto"
+    },
+    "resolution": {
+      "type": "dropdown",
+      "label": "Resolution",
+      "description": "Cost scales steeply with resolution. 1080p is roughly 2.2x the price of 720p.",
+      "value_type": "string",
+      "required": false,
+      "options": ["480p", "720p", "1080p", "4k"],
+      "default": "720p"
+    },
+    "aspect_ratio": {
+      "type": "dropdown",
+      "label": "Aspect Ratio",
+      "description": "'auto' matches the source image.",
+      "value_type": "string",
+      "required": false,
+      "options": ["auto", "21:9", "16:9", "4:3", "1:1", "3:4", "9:16"],
+      "default": "auto"
+    },
+    "generate_audio": {
+      "type": "checkbox",
+      "label": "Generate audio",
+      "description": "Adds a native soundtrack.",
+      "value_type": "bool",
+      "required": false,
+      "default": true
+    },
+    "bitrate_mode": {
+      "type": "dropdown",
+      "label": "Bitrate Mode",
+      "description": "'high' produces a cleaner encode at a larger file size.",
+      "value_type": "string",
+      "required": false,
+      "options": ["standard", "high"],
+      "default": "standard"
+    }
+  }
+}

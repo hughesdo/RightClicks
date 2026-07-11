@@ -30,6 +30,39 @@
     </None>
   </ItemGroup>
 
+  <!-- Include ImageToVideo model configuration files in output -->
+  <ItemGroup>
+    <None Include="ImageToVideo\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Include NEW fal.ai category model configs + LoRA registry in output -->
+  <ItemGroup>
+    <None Include="AudioToVideo\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="VideoToVideo\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Swaps\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TextToVideo\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="loras.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Include FirstLastFrame model configuration files in output -->
+  <ItemGroup>
+    <None Include="FirstLastFrame\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <!-- Include model configuration files in output -->
   <ItemGroup>
     <None Include="..\wan-flf2v.txt">

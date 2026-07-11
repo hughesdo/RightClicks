@@ -1,0 +1,81 @@
+{
+  "model_id": "fal-ai/veo3.1/fast/image-to-video",
+  "display_name": "Veo 3.1 Fast",
+  "description": "Google Veo 3.1 (fast tier). Best-in-class prompt understanding and dialogue-quality native audio.",
+  "pricing": "$0.10/sec no audio, $0.15/sec with audio @720p/1080p (~$0.75 for 5s with audio)",
+  "processing_time": "1-4 minutes",
+  "image_parameter": "image_url",
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Describe the motion and camera work you want. Veo also follows spoken-dialogue directions.",
+      "value_type": "string",
+      "required": true,
+      "multiline": true,
+      "rows": 5,
+      "default": ""
+    },
+    "negative_prompt": {
+      "type": "text",
+      "label": "Negative Prompt",
+      "description": "What to avoid in the generation.",
+      "value_type": "string",
+      "required": false,
+      "multiline": false,
+      "default": ""
+    },
+    "duration": {
+      "type": "dropdown",
+      "label": "Duration",
+      "description": "Veo accepts only these three lengths.",
+      "value_type": "string",
+      "required": false,
+      "options": ["4s", "6s", "8s"],
+      "default": "8s"
+    },
+    "resolution": {
+      "type": "dropdown",
+      "label": "Resolution",
+      "description": "4k costs roughly 3x the 720p/1080p rate.",
+      "value_type": "string",
+      "required": false,
+      "options": ["720p", "1080p", "4k"],
+      "default": "720p"
+    },
+    "aspect_ratio": {
+      "type": "dropdown",
+      "label": "Aspect Ratio",
+      "description": "'auto' matches the source image.",
+      "value_type": "string",
+      "required": false,
+      "options": ["auto", "16:9", "9:16"],
+      "default": "auto"
+    },
+    "generate_audio": {
+      "type": "checkbox",
+      "label": "Generate audio",
+      "description": "Adds native audio. Increases cost from $0.10/sec to $0.15/sec.",
+      "value_type": "bool",
+      "required": false,
+      "default": true
+    },
+    "auto_fix": {
+      "type": "checkbox",
+      "label": "Auto-fix prompt",
+      "description": "Lets Veo rewrite prompts that would otherwise be rejected by content filters.",
+      "value_type": "bool",
+      "required": false,
+      "default": false
+    },
+    "safety_tolerance": {
+      "type": "dropdown",
+      "label": "Safety Tolerance",
+      "description": "1 is the strictest filter, 6 the most permissive.",
+      "value_type": "string",
+      "required": false,
+      "options": ["1", "2", "3", "4", "5", "6"],
+      "default": "4"
+    }
+  }
+}

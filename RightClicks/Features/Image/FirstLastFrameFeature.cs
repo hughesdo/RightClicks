@@ -119,6 +119,8 @@ public class FirstLastFrameFeature : IFileFeature
 
             // Call fal.ai API
             Log.Information("Calling fal.ai API to generate video...");
+            Log.Information("Image param names: start={StartParam}, end={EndParam}",
+                configWindow.StartImageParamName, configWindow.EndImageParamName);
 
             using var apiService = new FirstLastFrameApiService(apiKey, configWindow.SelectedModelId!);
 
@@ -129,6 +131,8 @@ public class FirstLastFrameFeature : IFileFeature
                     configWindow.FirstImagePath,
                     configWindow.LastImagePath,
                     configWindow.Parameters,
+                    configWindow.StartImageParamName,
+                    configWindow.EndImageParamName,
                     cloudinaryConfig.Value.CloudName,
                     cloudinaryConfig.Value.ApiKey,
                     cloudinaryConfig.Value.ApiSecret,

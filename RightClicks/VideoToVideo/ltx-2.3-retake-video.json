@@ -1,0 +1,61 @@
+{
+  "type_id": "video_to_video",
+  "model_id": "fal-ai/ltx-2.3/retake-video",
+  "display_name": "LTX 2.3 — Retake Video",
+  "description": "Regenerate / vary an existing clip — a fresh 'take' of the same shot. Keep the prompt to steer the variation.",
+  "pricing": "~$0.06/sec (1080p)",
+  "processing_time": "1-4 minutes",
+  "output_type": "video",
+  "supports_loras": false,
+  "input_slots": [
+    {
+      "param": "video_url",
+      "role": "video",
+      "label": "Source Video",
+      "description": "The clip to re-generate a variation of.",
+      "required": true,
+      "accept": [".mp4", ".mov", ".webm", ".m4v"]
+    }
+  ],
+  "parameters": {
+    "prompt": {
+      "type": "text",
+      "label": "Prompt",
+      "description": "Optional — steer the new take.",
+      "value_type": "string",
+      "required": false,
+      "multiline": true,
+      "rows": 4,
+      "default": ""
+    },
+    "aspect_ratio": {
+      "type": "dropdown",
+      "label": "Aspect Ratio",
+      "description": "Output aspect ratio. 'auto' keeps the source ratio.",
+      "value_type": "string",
+      "required": false,
+      "options": ["auto", "16:9", "9:16", "1:1", "4:3", "3:4"],
+      "default": "auto"
+    },
+    "duration": {
+      "type": "dropdown",
+      "label": "Duration (sec)",
+      "description": "Length of the regenerated clip.",
+      "value_type": "int",
+      "required": false,
+      "options": ["6", "8", "10"],
+      "default": "6"
+    },
+    "guidance_scale": {
+      "type": "slider",
+      "label": "Guidance Scale",
+      "description": "Prompt adherence.",
+      "value_type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "default": 5
+    }
+  }
+}

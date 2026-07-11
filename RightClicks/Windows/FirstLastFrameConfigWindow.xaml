@@ -148,6 +148,11 @@
                           FontSize="14"
                           Padding="8"
                           SelectionChanged="ModelComboBox_SelectionChanged"/>
+                <TextBlock x:Name="ModelInfoText"
+                           FontSize="12"
+                           Foreground="{StaticResource SecondaryTextBrush}"
+                           Margin="0,8,0,0"
+                           TextWrapping="Wrap"/>
             </StackPanel>
         </Border>
 

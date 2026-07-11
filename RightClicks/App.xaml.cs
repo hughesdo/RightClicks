@@ -182,11 +182,16 @@ public partial class App : System.Windows.Application
         {
             if (_useQueue)
             {
-                // Add job to queue (for right-click invocation)
-                Task.Run(async () => await ExecuteFeatureViaQueueAsync(_featureId, _filePath)).GetAwaiter().GetResult();
+                // Add job to queue (for right-click invocation).
+                // Stay on the UI thread here. A configurable feature shows its dialog from inside
+                // this call, and offloading to Task.Run(...).GetAwaiter().GetResult() would block the
+                // dispatcher while that dialog tries to marshal back onto it - an instant deadlock
+                // whenever RightClicks wasn't already running.
+                ExecuteFeatureViaQueueAsync(_featureId, _filePath).GetAwaiter().GetResult();
 
-                // Don't shut down - initialize tray icon and let job queue process the job
-                Log.Information("Job queued. Initializing system tray to process queue...");
+                // Carry on into the tray either way. If the user cancelled the dialog nothing was
+                // queued, but RightClicks still stays resident for the next action.
+                Log.Information("Initializing system tray...");
             }
             else
             {
@@ -461,6 +466,26 @@ public partial class App : System.Windows.Application
             Log.Information("Supported extensions: {Extensions}", string.Join(", ", feature.SupportedExtensions));
         }
 
+        // Features with a settings dialog must collect their configuration BEFORE anything is
+        // queued - otherwise the job shows up in Queued Jobs while the user is still typing,
+        // and cancelling the dialog would strand a phantom job in the list.
+        object? configuration = null;
+
+        if (feature is Models.IConfigurableFeature configurable)
+        {
+            Log.Information("Feature {FeatureId} requires configuration - prompting user before queueing", featureId);
+
+            configuration = Dispatcher.Invoke(() => configurable.Configure(filePath));
+
+            if (configuration == null)
+            {
+                Log.Information("User cancelled configuration for {FeatureId} - no job queued", featureId);
+                return Task.CompletedTask;
+            }
+
+            Log.Information("Configuration collected - queueing job");
+        }
+
         // Create job and add to queue
         var job = new Models.Job
         {
@@ -469,7 +494,8 @@ public partial class App : System.Windows.Application
             FeatureName = feature.DisplayName,
             FilePath = filePath,
             Status = Models.JobStatus.Pending,
-            CreatedAt = DateTime.Now
+            CreatedAt = DateTime.Now,
+            Configuration = configuration
         };
 
         Log.Information("Adding job to queue: {JobId}", job.Id);

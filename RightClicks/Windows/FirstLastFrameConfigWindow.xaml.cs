@@ -44,6 +44,16 @@ public partial class FirstLastFrameConfigWindow : Window
     public string? SelectedModelDisplayName => _currentModelConfig?.display_name;
     public Dictionary<string, object> Parameters => _parameterValues;
 
+    /// <summary>
+    /// Gets the API parameter name for the start/first image URL.
+    /// </summary>
+    public string StartImageParamName => _currentModelConfig?.image_param_names?.start ?? "start_image_url";
+
+    /// <summary>
+    /// Gets the API parameter name for the end/last image URL.
+    /// </summary>
+    public string EndImageParamName => _currentModelConfig?.image_param_names?.end ?? "end_image_url";
+
     public FirstLastFrameConfigWindow(string firstImagePath, string lastImagePath)
     {
         InitializeComponent();
@@ -93,7 +103,7 @@ public partial class FirstLastFrameConfigWindow : Window
     }
 
     /// <summary>
-    /// Load model configurations from JSON files.
+    /// Load model configurations from JSON files in FirstLastFrame folder.
     /// </summary>
     private void LoadModelConfigurations()
     {
@@ -102,45 +112,42 @@ public partial class FirstLastFrameConfigWindow : Window
         try
         {
             var appDir = AppDomain.CurrentDomain.BaseDirectory;
-            
-            // Load wan-flf2v.txt
-            var wanConfigPath = Path.Combine(appDir, "wan-flf2v.txt");
-            if (File.Exists(wanConfigPath))
+            var configDir = Path.Combine(appDir, "FirstLastFrame");
+
+            if (!Directory.Exists(configDir))
             {
-                var wanJson = File.ReadAllText(wanConfigPath);
-                var wanConfig = JsonSerializer.Deserialize<ModelConfig>(wanJson);
-                if (wanConfig != null)
-                {
-                    _modelConfigs[wanConfig.display_name] = wanConfig;
-                    Log.Information("Loaded model config: {ModelName}", wanConfig.display_name);
-                }
-            }
-            else
-            {
-                Log.Warning("Model config file not found: {Path}", wanConfigPath);
+                Log.Error("FirstLastFrame configuration directory not found: {Path}", configDir);
+                WpfMessageBox.Show($"Configuration directory not found: {configDir}", "Configuration Error",
+                    WpfMessageBoxButton.OK, WpfMessageBoxImage.Error);
+                return;
             }
 
-            // Load first-last-frame-to-video.txt
-            var veoConfigPath = Path.Combine(appDir, "first-last-frame-to-video.txt");
-            if (File.Exists(veoConfigPath))
+            var jsonFiles = Directory.GetFiles(configDir, "*.json");
+            Log.Information("Found {Count} First+Last Frame model configuration files", jsonFiles.Length);
+
+            foreach (var jsonFile in jsonFiles)
             {
-                var veoJson = File.ReadAllText(veoConfigPath);
-                var veoConfig = JsonSerializer.Deserialize<ModelConfig>(veoJson);
-                if (veoConfig != null)
+                try
                 {
-                    _modelConfigs[veoConfig.display_name] = veoConfig;
-                    Log.Information("Loaded model config: {ModelName}", veoConfig.display_name);
+                    var json = File.ReadAllText(jsonFile);
+                    var config = JsonSerializer.Deserialize<ModelConfig>(json);
+                    if (config != null && !string.IsNullOrEmpty(config.display_name))
+                    {
+                        _modelConfigs[config.display_name] = config;
+                        Log.Information("Loaded model config: {ModelName} from {FileName}",
+                            config.display_name, Path.GetFileName(jsonFile));
+                    }
                 }
-            }
-            else
-            {
-                Log.Warning("Model config file not found: {Path}", veoConfigPath);
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "Failed to load model config from {FileName}", Path.GetFileName(jsonFile));
+                }
             }
 
             if (_modelConfigs.Count == 0)
             {
                 Log.Error("No model configurations loaded!");
-                WpfMessageBox.Show("No model configurations found. Please ensure wan-flf2v.txt and first-last-frame-to-video.txt exist in the application directory.",
+                WpfMessageBox.Show("No model configurations found. Please ensure JSON files exist in the FirstLastFrame directory.",
                     "Configuration Error", WpfMessageBoxButton.OK, WpfMessageBoxImage.Error);
             }
         }
@@ -162,7 +169,10 @@ public partial class FirstLastFrameConfigWindow : Window
             return;
         }
 
-        foreach (var modelName in _modelConfigs.Keys)
+        ModelComboBox.Items.Clear();
+
+        // Sort models by display name
+        foreach (var modelName in _modelConfigs.Keys.OrderBy(k => k))
         {
             ModelComboBox.Items.Add(modelName);
         }
@@ -172,6 +182,8 @@ public partial class FirstLastFrameConfigWindow : Window
         {
             ModelComboBox.SelectedIndex = 0;
         }
+
+        Log.Information("Populated model dropdown with {Count} models", ModelComboBox.Items.Count);
     }
 
     /// <summary>
@@ -187,7 +199,11 @@ public partial class FirstLastFrameConfigWindow : Window
             return;
 
         _currentModelConfig = _modelConfigs[selectedModelName];
-        Log.Information("Model selected: {ModelName}", selectedModelName);
+        Log.Information("Model selected: {ModelName} ({ModelId})",
+            _currentModelConfig.display_name, _currentModelConfig.model_id);
+
+        // Update model info text
+        ModelInfoText.Text = $"{_currentModelConfig.description}\nPricing: {_currentModelConfig.pricing} | Processing: {_currentModelConfig.processing_time}";
 
         BuildDynamicForm();
     }
@@ -621,7 +637,14 @@ public partial class FirstLastFrameConfigWindow : Window
         public string description { get; set; } = "";
         public string pricing { get; set; } = "";
         public string processing_time { get; set; } = "";
+        public ImageParamNamesConfig image_param_names { get; set; } = new();
         public Dictionary<string, ParameterConfig> parameters { get; set; } = new();
+    }
+
+    public class ImageParamNamesConfig
+    {
+        public string start { get; set; } = "start_image_url";
+        public string end { get; set; } = "end_image_url";
     }
 
     public class ParameterConfig

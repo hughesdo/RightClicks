@@ -1,0 +1,30 @@
+{
+  "type_id": "swap",
+  "model_id": "fal-ai/face-swap",
+  "display_name": "Face Swap",
+  "description": "Swap the face from one image onto another. Image-output.",
+  "pricing": "low",
+  "processing_time": "seconds",
+  "output_type": "image",
+  "supports_loras": false,
+  "loras_required": false,
+  "input_slots": [
+    {
+      "param": "base_image_url",
+      "role": "image",
+      "label": "Target Image",
+      "description": "The image whose face will be replaced (the right-clicked image).",
+      "required": true,
+      "accept": [".jpg", ".jpeg", ".png", ".webp"]
+    },
+    {
+      "param": "swap_image_url",
+      "role": "image",
+      "label": "Face Source Image",
+      "description": "The image supplying the face to paste onto the target.",
+      "required": true,
+      "accept": [".jpg", ".jpeg", ".png", ".webp"]
+    }
+  ],
+  "parameters": {}
+}

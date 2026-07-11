@@ -1,7 +1,14 @@
 ﻿<Application x:Class="RightClicks.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:RightClicks">
+             xmlns:local="clr-namespace:RightClicks"
+             ShutdownMode="OnExplicitShutdown">
+    <!--
+        RightClicks lives in the tray, so it must NOT use the default OnLastWindowClose. Feature
+        dialogs (Image to Video, etc.) are often the only open window, and closing or cancelling one
+        would otherwise look like "the last window closed" and take the whole app down with it.
+        The app exits only where we call Shutdown() explicitly: the tray Exit item and the CLI paths.
+    -->
     <Application.Resources>
 
     </Application.Resources>

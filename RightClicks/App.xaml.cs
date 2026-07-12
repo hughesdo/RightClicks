@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Forms;
@@ -25,6 +26,13 @@ public partial class App : System.Windows.Application
     private FileStream? _lockFileStream = null;
     private ClipboardMonitorService? _clipboardMonitor = null;
     private VideoDownloaderService? _videoDownloader = null;
+
+    /// <summary>
+    /// File or folder that the currently-displayed balloon notification points at.
+    /// Clicking the balloon reveals this in Explorer. Null means the balloon has nothing
+    /// to reveal (e.g. a failure notification), so clicking it does nothing.
+    /// </summary>
+    private string? _notificationRevealPath = null;
 
     /// <summary>
     /// Job queue service instance (shared across application).
@@ -165,7 +173,8 @@ public partial class App : System.Windows.Application
 
             // Show notification when download starts/completes
             _videoDownloader.DownloadCompleted += (s, e) =>
-                ShowNotification("Video Downloaded", $"{e.Platform} video saved to {Path.GetFileName(e.DownloadFolder)}", ToolTipIcon.Info);
+                ShowNotification("Video Downloaded", $"{e.Platform} video saved to {Path.GetFileName(e.DownloadFolder)}", ToolTipIcon.Info,
+                    revealPath: e.DownloadFolder);
             _videoDownloader.DownloadFailed += (s, e) =>
                 ShowNotification("Download Failed", $"{e.Platform}: {e.Error}", ToolTipIcon.Error);
 
@@ -295,7 +304,8 @@ public partial class App : System.Windows.Application
             _clipboardMonitor = new ClipboardMonitorService(_videoDownloader, settings.Enabled);
 
             _videoDownloader.DownloadCompleted += (s, e) =>
-                ShowNotification("Video Downloaded", $"{e.Platform} video saved to {Path.GetFileName(e.DownloadFolder)}", ToolTipIcon.Info);
+                ShowNotification("Video Downloaded", $"{e.Platform} video saved to {Path.GetFileName(e.DownloadFolder)}", ToolTipIcon.Info,
+                    revealPath: e.DownloadFolder);
             _videoDownloader.DownloadFailed += (s, e) =>
                 ShowNotification("Download Failed", $"{e.Platform}: {e.Error}", ToolTipIcon.Error);
         }
@@ -346,6 +356,14 @@ public partial class App : System.Windows.Application
 
         // Handle double-click to open main window (backup)
         _notifyIcon.DoubleClick += (s, e) => ShowMainWindow();
+
+        // Clicking a completion balloon reveals the output file in Explorer.
+        // This fires only for the balloon itself, not the tray icon.
+        _notifyIcon.BalloonTipClicked += (s, e) => RevealNotificationTarget();
+
+        // Once the balloon times out or is dismissed, drop the target so a later stray
+        // click can't reveal a stale file.
+        _notifyIcon.BalloonTipClosed += (s, e) => _notificationRevealPath = null;
 
         Log.Information("System tray icon created with context menu");
     }
@@ -638,7 +656,9 @@ public partial class App : System.Windows.Application
                 ShowNotification(
                     "Job Complete",
                     $"{job.FeatureName} completed successfully\n{Path.GetFileName(job.OutputFilePath ?? job.FilePath)}",
-                    ToolTipIcon.Info
+                    ToolTipIcon.Info,
+                    // Click the balloon to reveal the output file in Explorer.
+                    revealPath: job.OutputFilePath ?? job.FilePath
                 );
             }
         }
@@ -653,12 +673,71 @@ public partial class App : System.Windows.Application
     }
 
     /// <summary>
+    /// Open Explorer at the file/folder the current balloon notification points at.
+    /// Called when the user clicks the balloon. Does nothing if there is no target
+    /// (e.g. a failure notification) or the target no longer exists.
+    /// </summary>
+    private void RevealNotificationTarget()
+    {
+        var path = _notificationRevealPath;
+
+        if (string.IsNullOrEmpty(path))
+        {
+            Log.Debug("Balloon clicked but there is nothing to reveal");
+            return;
+        }
+
+        try
+        {
+            if (File.Exists(path))
+            {
+                // Open the containing folder with the file selected.
+                Log.Information("Balloon clicked - revealing file in Explorer: {Path}", path);
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"/select,\"{path}\"",
+                    UseShellExecute = true
+                });
+            }
+            else if (Directory.Exists(path))
+            {
+                // No single output file (e.g. a video download) - just open the folder.
+                Log.Information("Balloon clicked - opening folder in Explorer: {Path}", path);
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"\"{path}\"",
+                    UseShellExecute = true
+                });
+            }
+            else
+            {
+                Log.Warning("Balloon clicked but target no longer exists: {Path}", path);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Never let a failed reveal take the app down.
+            Log.Error(ex, "Failed to reveal path in Explorer: {Path}", path);
+        }
+    }
+
+    /// <summary>
     /// Show a balloon notification from the system tray icon with sound.
     /// </summary>
-    private void ShowNotification(string title, string message, ToolTipIcon icon)
+    /// <param name="revealPath">
+    /// Optional file or folder to reveal in Explorer if the user clicks the balloon.
+    /// Pass null for notifications with nothing to show (e.g. failures).
+    /// </param>
+    private void ShowNotification(string title, string message, ToolTipIcon icon, string? revealPath = null)
     {
         if (_notifyIcon != null)
         {
+            // Remember what this balloon points at. Only the most recent balloon can be
+            // clicked, so a single field is sufficient.
+            _notificationRevealPath = revealPath;
+
             _notifyIcon.ShowBalloonTip(
                 timeout: 5000, // 5 seconds
                 tipTitle: title,

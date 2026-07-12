@@ -165,7 +165,13 @@ public class VideoDownloaderService
             var psi = new ProcessStartInfo
             {
                 FileName = _ytDlpPath,
-                Arguments = $"\"{url}\"",
+                // --compat-options no-certifi: make yt-dlp's embedded Python verify TLS against the
+                // Windows certificate store instead of its bundled certifi CA list. Antivirus/proxy
+                // TLS inspection (e.g. Avast Web Shield) re-signs HTTPS with a root that only exists
+                // in the Windows store, so without this every download dies with
+                // CERTIFICATE_VERIFY_FAILED. The Windows store also contains all the normal public
+                // roots, so this is safe on machines with no interception.
+                Arguments = $"--compat-options no-certifi \"{url}\"",
                 WorkingDirectory = downloadFolder,
                 UseShellExecute = false,
                 CreateNoWindow = true,

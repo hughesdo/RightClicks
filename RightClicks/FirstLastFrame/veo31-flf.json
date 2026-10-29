@@ -12,7 +12,7 @@
     "prompt": {
       "type": "text",
       "label": "Prompt",
-      "description": "Text prompt to guide video generation",
+      "description": "Text prompt describing the video transition",
       "required": true,
       "default": "A smooth cinematic transition between the two frames",
       "multiline": true,
@@ -34,16 +34,43 @@
       "label": "Duration",
       "description": "Video duration in seconds",
       "required": false,
-      "options": ["5", "8"],
-      "default": "5"
+      "options": [
+        "4s",
+        "6s",
+        "8s"
+      ],
+      "default": "8s"
     },
     "aspect_ratio": {
       "type": "dropdown",
       "label": "Aspect Ratio",
       "description": "Video aspect ratio",
       "required": false,
-      "options": ["16:9", "9:16", "1:1"],
+      "options": [
+        "auto",
+        "16:9",
+        "9:16"
+      ],
       "default": "16:9"
+    },
+    "resolution": {
+      "type": "dropdown",
+      "label": "Resolution",
+      "description": "Output video resolution",
+      "required": false,
+      "options": [
+        "720p",
+        "1080p",
+        "4k"
+      ],
+      "default": "720p"
+    },
+    "generate_audio": {
+      "type": "checkbox",
+      "label": "Generate Audio",
+      "description": "Generate audio for the video",
+      "required": false,
+      "default": true
     },
     "seed": {
       "type": "number",
@@ -57,4 +84,3 @@
     }
   }
 }
-

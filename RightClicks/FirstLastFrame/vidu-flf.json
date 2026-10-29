@@ -12,7 +12,7 @@
     "prompt": {
       "type": "text",
       "label": "Prompt",
-      "description": "Text prompt for video generation (max 1500 characters)",
+      "description": "Text prompt describing the video transition",
       "required": true,
       "default": "Transform smoothly between the two images",
       "multiline": true,
@@ -24,7 +24,12 @@
       "label": "Movement Amplitude",
       "description": "The movement amplitude of objects in the frame",
       "required": false,
-      "options": ["auto", "small", "medium", "large"],
+      "options": [
+        "auto",
+        "small",
+        "medium",
+        "large"
+      ],
       "default": "auto"
     },
     "seed": {
@@ -39,4 +44,3 @@
     }
   }
 }
-

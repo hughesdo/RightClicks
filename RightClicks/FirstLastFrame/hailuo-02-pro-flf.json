@@ -6,7 +6,7 @@
   "processing_time": "~2-3 minutes",
   "image_param_names": {
     "start": "image_url",
-    "end": "last_frame_url"
+    "end": "end_image_url"
   },
   "parameters": {
     "prompt": {
@@ -19,32 +19,12 @@
       "rows": 3,
       "clear_on_focus": true
     },
-    "duration": {
-      "type": "dropdown",
-      "label": "Duration",
-      "description": "Video duration in seconds",
+    "prompt_optimizer": {
+      "type": "checkbox",
+      "label": "Prompt Optimizer",
+      "description": "Let the model refine your prompt automatically",
       "required": false,
-      "options": ["5", "6"],
-      "default": "5"
-    },
-    "resolution": {
-      "type": "dropdown",
-      "label": "Resolution",
-      "description": "Output video resolution",
-      "required": false,
-      "options": ["720p", "1080p"],
-      "default": "720p"
-    },
-    "seed": {
-      "type": "number",
-      "label": "Seed",
-      "description": "Random seed for reproducibility (leave empty for random)",
-      "required": false,
-      "default": "Random",
-      "min": 0,
-      "max": 2147483647,
-      "step": 1
+      "default": true
     }
   }
 }
-

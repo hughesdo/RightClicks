@@ -5,14 +5,14 @@
   "pricing": "$0.15/video",
   "processing_time": "~1-2 minutes",
   "image_param_names": {
-    "start": "start_frame_url",
-    "end": "end_frame_url"
+    "start": "image_url",
+    "end": "end_image_url"
   },
   "parameters": {
     "prompt": {
       "type": "text",
       "label": "Prompt",
-      "description": "Text prompt to guide video generation",
+      "description": "Text prompt describing the video transition",
       "required": true,
       "default": "A smooth transition between the two frames",
       "multiline": true,
@@ -29,15 +29,37 @@
       "rows": 1,
       "clear_on_focus": false
     },
+    "resolution": {
+      "type": "dropdown",
+      "label": "Resolution",
+      "description": "Output video resolution",
+      "required": false,
+      "options": [
+        "720p",
+        "480p"
+      ],
+      "default": "480p"
+    },
+    "aspect_ratio": {
+      "type": "dropdown",
+      "label": "Aspect Ratio",
+      "description": "Video aspect ratio",
+      "required": false,
+      "options": [
+        "16:9",
+        "9:16"
+      ],
+      "default": "16:9"
+    },
     "num_frames": {
       "type": "slider",
       "label": "Number of Frames",
       "description": "Total frames in the generated video",
       "required": false,
-      "default": 49,
-      "min": 25,
-      "max": 97,
-      "step": 1
+      "default": 240,
+      "min": 30,
+      "max": 600,
+      "step": 30
     },
     "seed": {
       "type": "number",
@@ -51,4 +73,3 @@
     }
   }
 }
-

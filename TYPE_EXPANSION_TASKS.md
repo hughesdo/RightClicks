@@ -202,6 +202,14 @@ text-to-video, Seedance 2.0 text-to-video, LTX retake-video.
 
 ## 📝 Session Log
 
+- **2026-07-11 (f)** — Don confirmed ALL FOUR categories work. Wrote
+  `TESTING_NOTES_2026-07-11_fal-type-expansion.md`, revised README.md (status 59+→82, new
+  fal.ai AI-video-generation section). **Committed full working snapshot (129 files) and pushed
+  straight to main: `7dc099a..045698b`.** Note: git flagged a pre-existing DANGLING corrupt loose
+  object (10252f667…, unreachable — did not affect commit/push) and a broken `origin/HEAD` ref;
+  both harmless, offered to clean.
+
+
 - **2026-07-11 (a)** — Grilled & locked all requirements (scope = 4 categories; Image-to-Video
   frozen; shared engine; Swaps both outputs; A-to-V both entry points; versioned+re-encoded
   output). Verified Cloudinary blob routing, fal sync-vs-queue gap, image-output gap. Wrote this

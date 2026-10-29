@@ -24,7 +24,8 @@ public class FalAiService : IDisposable
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
     private readonly string _baseUrl;
-    private const int MaxRetries = 3;
+    private readonly string _endpoint;
+    private const int MaxRetries = 2; // 1 retry, downloads only - NEVER the billed generation call
     private const int RetryDelayMs = 2000; // 2 seconds
 
     /// <summary>
@@ -45,10 +46,11 @@ public class FalAiService : IDisposable
         }
 
         _apiKey = apiKey;
-        _baseUrl = $"https://fal.run/{endpoint}";
+        _endpoint = endpoint;
+        _baseUrl = $"https://queue.fal.run/{endpoint}";
         _httpClient = new HttpClient
         {
-            Timeout = TimeSpan.FromMinutes(5) // 5 minute timeout for synchronous processing
+            Timeout = TimeSpan.FromMinutes(5) // per HTTP call (submit/poll/download); generation itself is polled via queue
         };
 
         // CRITICAL: fal.ai uses "Key" prefix, not "Bearer"
@@ -73,52 +75,33 @@ public class FalAiService : IDisposable
         Log.Debug("Video URL: {VideoUrl}", request.Input.VideoUrl);
         Log.Debug("Audio URL: {AudioUrl}", request.Input.AudioUrl ?? "(none)");
 
-        return await ExecuteWithRetryAsync(async () =>
+        // Serialize just the Input object (not the wrapper)
+        var json = JsonSerializer.Serialize(request.Input, new JsonSerializerOptions
         {
-            // Serialize just the Input object (not the wrapper)
-            var json = JsonSerializer.Serialize(request.Input, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-            });
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+        });
+        Log.Debug("Request JSON: {Json}", json);
 
-            Log.Debug("Request JSON: {Json}", json);
+        // Queue API: submit once (never retried - it is billed), then poll.
+        var responseBody = await FalQueueClient.RunAsync(_httpClient, _endpoint, json, cancellationToken);
 
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var result = JsonSerializer.Deserialize<FalAiLipSyncResult>(responseBody, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+        });
 
-            Log.Information("Sending POST request to {BaseUrl}...", _baseUrl);
-            var response = await _httpClient.PostAsync(_baseUrl, content, cancellationToken);
+        if (result?.Video == null)
+        {
+            Log.Error("Invalid response from fal.ai: {ResponseBody}", responseBody);
+            throw new InvalidOperationException("Invalid response from fal.ai API - no video in result");
+        }
 
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+        Log.Information("Lipsync completed successfully!");
+        Log.Information("Output video URL: {VideoUrl}", result.Video.Url);
+        Log.Information("Output video size: {SizeKB:F2} KB", result.Video.FileSize / 1024.0);
 
-            Log.Debug("Response status: {StatusCode}", response.StatusCode);
-            Log.Debug("Response body: {ResponseBody}", responseBody);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                Log.Error("fal.ai API error: {StatusCode} - {ResponseBody}",
-                    response.StatusCode, responseBody);
-                throw new HttpRequestException(
-                    $"fal.ai API returned {response.StatusCode}: {responseBody}");
-            }
-
-            var result = JsonSerializer.Deserialize<FalAiLipSyncResult>(responseBody, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-            });
-
-            if (result?.Video == null)
-            {
-                Log.Error("Invalid response from fal.ai: {ResponseBody}", responseBody);
-                throw new InvalidOperationException("Invalid response from fal.ai API - no video in result");
-            }
-
-            Log.Information("Lipsync completed successfully!");
-            Log.Information("Output video URL: {VideoUrl}", result.Video.Url);
-            Log.Information("Output video size: {SizeKB:F2} KB", result.Video.FileSize / 1024.0);
-
-            return result;
-        }, cancellationToken);
+        return result;
     }
 
     /// <summary>

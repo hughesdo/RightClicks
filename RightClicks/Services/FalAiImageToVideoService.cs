@@ -20,7 +20,8 @@ public class FalAiImageToVideoService : IDisposable
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
     private readonly string _baseUrl;
-    private const int MaxRetries = 3;
+    private readonly string _endpoint;
+    private const int MaxRetries = 2;
     private const int RetryDelayMs = 2000; // 2 seconds
 
     /// <summary>
@@ -41,7 +42,8 @@ public class FalAiImageToVideoService : IDisposable
         }
 
         _apiKey = apiKey;
-        _baseUrl = $"https://fal.run/{endpoint}";
+        _endpoint = endpoint;
+        _baseUrl = $"https://queue.fal.run/{endpoint}";
         _httpClient = new HttpClient
         {
             Timeout = TimeSpan.FromMinutes(10) // 10 minute timeout for video generation
@@ -72,51 +74,30 @@ public class FalAiImageToVideoService : IDisposable
     {
         Log.Information("Submitting image-to-video request to fal.ai (synchronous endpoint)...");
 
-        return await ExecuteWithRetryAsync(async () =>
+        var options = new JsonSerializerOptions
         {
-            // Response uses snake_case; the payload keys are already exact model parameter names.
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-            };
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+        };
+        var json = JsonSerializer.Serialize(payload, options);
+        Log.Debug("Request JSON: {Json}", json);
 
-            var json = JsonSerializer.Serialize(payload, options);
+        // Queue API: submit once (never retried - it is billed), then poll.
+        var responseBody = await FalQueueClient.RunAsync(_httpClient, _endpoint, json, cancellationToken);
 
-            Log.Debug("Request JSON: {Json}", json);
+        var result = JsonSerializer.Deserialize<FalAiImageToVideoResult>(responseBody, options);
 
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+        if (result?.Video == null)
+        {
+            Log.Error("Invalid response from fal.ai: {ResponseBody}", responseBody);
+            throw new InvalidOperationException("Invalid response from fal.ai API - no video in result");
+        }
 
-            Log.Information("Sending POST request to {BaseUrl}...", _baseUrl);
-            var response = await _httpClient.PostAsync(_baseUrl, content, cancellationToken);
+        Log.Information("Image-to-video generation completed successfully!");
+        Log.Information("Output video URL: {VideoUrl}", result.Video.Url);
+        Log.Information("Output video size: {SizeKB:F2} KB", result.Video.FileSize / 1024.0);
 
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-
-            Log.Debug("Response status: {StatusCode}", response.StatusCode);
-            Log.Debug("Response body: {ResponseBody}", responseBody);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                Log.Error("fal.ai API error: {StatusCode} - {ResponseBody}",
-                    response.StatusCode, responseBody);
-                throw new HttpRequestException(
-                    $"fal.ai API returned {response.StatusCode}: {responseBody}");
-            }
-
-            var result = JsonSerializer.Deserialize<FalAiImageToVideoResult>(responseBody, options);
-
-            if (result?.Video == null)
-            {
-                Log.Error("Invalid response from fal.ai: {ResponseBody}", responseBody);
-                throw new InvalidOperationException("Invalid response from fal.ai API - no video in result");
-            }
-
-            Log.Information("Image-to-video generation completed successfully!");
-            Log.Information("Output video URL: {VideoUrl}", result.Video.Url);
-            Log.Information("Output video size: {SizeKB:F2} KB", result.Video.FileSize / 1024.0);
-
-            return result;
-        }, cancellationToken);
+        return result;
     }
 
     /// <summary>

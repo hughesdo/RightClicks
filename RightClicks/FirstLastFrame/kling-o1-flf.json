@@ -5,8 +5,8 @@
   "pricing": "$0.112/sec (~$0.56 for 5s video)",
   "processing_time": "~3-5 minutes",
   "image_param_names": {
-    "start": "image_url",
-    "end": "tail_image_url"
+    "start": "start_image_url",
+    "end": "end_image_url"
   },
   "parameters": {
     "prompt": {
@@ -19,42 +19,22 @@
       "rows": 3,
       "clear_on_focus": true
     },
-    "negative_prompt": {
-      "type": "text",
-      "label": "Negative Prompt",
-      "description": "What to avoid in the generation",
-      "required": false,
-      "default": "blur, distort, low quality, static",
-      "multiline": false,
-      "rows": 1,
-      "clear_on_focus": false
-    },
     "duration": {
       "type": "dropdown",
       "label": "Duration",
       "description": "Video duration in seconds",
       "required": false,
-      "options": ["5", "10"],
+      "options": [
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
+      ],
       "default": "5"
-    },
-    "aspect_ratio": {
-      "type": "dropdown",
-      "label": "Aspect Ratio",
-      "description": "Video aspect ratio",
-      "required": false,
-      "options": ["16:9", "9:16", "1:1"],
-      "default": "16:9"
-    },
-    "seed": {
-      "type": "number",
-      "label": "Seed",
-      "description": "Random seed for reproducibility (leave empty for random)",
-      "required": false,
-      "default": "Random",
-      "min": 0,
-      "max": 2147483647,
-      "step": 1
     }
   }
 }
-
